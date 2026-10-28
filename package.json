@@ -1,0 +1,11 @@
+{
+  "name": "aurora-app",
+  "private": true,
+  "description": "Landing do teste fechado do Aurora (HTML estático, sem build)",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
