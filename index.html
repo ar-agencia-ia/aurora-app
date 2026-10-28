@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aurora — teste fechado no Android</title>
+<meta name="description" content="Ajude a testar o Aurora, um app Android para executar as seis práticas da manhã. Teste fechado de 14 dias.">
+<style>
+@font-face{font-family:Roboto;font-weight:400;font-style:normal;font-display:swap;src:url(fonts/Roboto-Regular.ttf) format("truetype")}
+@font-face{font-family:Roboto;font-weight:500;font-style:normal;font-display:swap;src:url(fonts/Roboto-Medium.ttf) format("truetype")}
+:root{
+  color-scheme:light;
+  --bg:#F8F9FF;
+  --ink:#191C20;
+  --mut:#545F70;
+  --primary:#3A608F;
+  --on-primary:#FFFFFF;
+  --card:#EDF0F8;
+  --chip:#D8E3F8;
+  --outline:#73777F;
+  --space-sm:8px;--space-md:12px;--space-lg:16px;--space-xl:24px;--space-xxl:32px;--space-section:48px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Roboto,system-ui,sans-serif;letter-spacing:.5px}
+main,header,footer{max-width:40rem;margin:0 auto;padding-left:var(--space-lg);padding-right:var(--space-lg)}
+header{padding-top:var(--space-xl);display:flex;align-items:center;gap:var(--space-md)}
+.marca{font-weight:500;font-size:20px;letter-spacing:.15px}
+section{padding:var(--space-section) 0 0}
+h1{font-size:36px;line-height:1.15;font-weight:400;margin:var(--space-xl) 0 var(--space-lg);letter-spacing:0}
+h2{font-size:24px;line-height:1.29;font-weight:400;margin:0 0 var(--space-lg);letter-spacing:0}
+p{margin:0 0 var(--space-lg)}
+.lead{font-size:18px}
+.mut{color:var(--mut)}
+.chips{list-style:none;margin:var(--space-lg) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:var(--space-sm)}
+.chips li{background:var(--chip);color:var(--mut);border-radius:8px;padding:var(--space-sm) var(--space-md);font-weight:500;font-size:14px;letter-spacing:.5px}
+.passos{list-style:none;margin:0;padding:0;display:grid;gap:var(--space-md)}
+.passos li{background:var(--card);border-radius:12px;padding:var(--space-lg);display:grid;grid-template-columns:32px 1fr;gap:var(--space-md);align-items:start}
+.passos .n{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--primary);color:var(--on-primary);font-weight:500}
+.passos strong{font-weight:500}
+.cadastro{background:var(--card);border-radius:16px;padding:var(--space-xl)}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:48px;padding:0 var(--space-xl);border-radius:20px;background:var(--primary);color:var(--on-primary);font-weight:500;font-size:16px;letter-spacing:.15px;text-decoration:none}
+.cta:focus-visible,.link:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.link{display:flex;align-items:center;min-height:48px;color:var(--primary);font-weight:500;text-decoration:underline}
+.fechado{font-weight:500;margin:0}
+[hidden]{display:none!important}
+footer{padding-top:var(--space-section);padding-bottom:var(--space-section);border-top:0}
+footer p{font-size:14px;color:var(--mut)}
+@media (min-width:600px){h1{font-size:45px;line-height:1.12}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+  <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="19" r="8" fill="#3A608F"/><rect x="2" y="19" width="28" height="3" rx="1.5" fill="#D8E3F8"/></svg>
+  <span class="marca">Aurora</span>
+</header>
+
+<main>
+  <section id="promessa" aria-labelledby="titulo">
+    <h1 id="titulo">Sua rotina da manhã, em poucos minutos por dia.</h1>
+    <p class="lead">O Aurora é um app para Android que reúne as seis práticas da manhã num só lugar: silêncio, afirmações, visualização, exercício, leitura e diário. Sem curso, sem desafio de 30 dias e sem comunidade. Só você e a sua rotina.</p>
+    <p>Estamos formando o grupo do <strong>teste fechado</strong>, só para quem usa Android. Antes de chegar à loja, o app precisa passar por um teste com pessoas de verdade. Você pode ajudar.</p>
+  </section>
+
+  <section id="praticas" aria-labelledby="titulo-praticas">
+    <h2 id="titulo-praticas">As seis práticas</h2>
+    <p>Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.</p>
+    <ul class="chips">
+      <li>Silêncio</li>
+      <li>Afirmações</li>
+      <li>Visualização</li>
+      <li>Exercício</li>
+      <li>Leitura</li>
+      <li>Diário</li>
+    </ul>
+  </section>
+
+  <section id="passos" aria-labelledby="titulo-passos">
+    <h2 id="titulo-passos">Como funciona o teste</h2>
+    <ol class="passos">
+      <li><span class="n" aria-hidden="true">1</span><span><strong>Entre na lista.</strong> Você entra com a sua conta Google e confirma que usa Android.</span></li>
+      <li><span class="n" aria-hidden="true">2</span><span><strong>Receba o convite.</strong> Mandamos por e-mail o link para instalar o app pela Google Play.</span></li>
+      <li><span class="n" aria-hidden="true">3</span><span><strong>Use por 14 dias seguidos.</strong> O Google exige que cada testador continue inscrito durante todo o período. Você só precisa manter o app instalado e abrir quando quiser.</span></li>
+    </ol>
+  </section>
+
+  <section id="cadastro" aria-labelledby="titulo-cadastro">
+    <h2 id="titulo-cadastro">Entrar na lista de testadores</h2>
+    <div class="cadastro">
+      <!-- Portão do teste fechado: com FORMS_URL vazio a landing fica fechada. Para abrir, cole a URL do formulário entre as aspas de FORMS_URL, no script ao fim da página. -->
+      <p id="portao-fechado" class="fechado">As inscrições ainda não abriram. Volte em breve.</p>
+      <div id="portao-aberto" hidden>
+        <p>Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, também pede um aviso quando o Aurora for lançado.</p>
+        <a id="entrar" class="cta" href="#cadastro" rel="noopener">Entrar na lista</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a class="link" href="https://ar-agencia-ia.github.io/aurora-releases/privacidade/">Política de privacidade</a>
+  <p>O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.</p>
+  <p>Esta página não usa cookies, rastreadores nem serviços de terceiros.</p>
+</footer>
+
+<script>
+(function () {
+  var FORMS_URL = "";
+  if (!FORMS_URL) return;
+  document.getElementById("entrar").setAttribute("href", FORMS_URL);
+  document.getElementById("portao-fechado").hidden = true;
+  document.getElementById("portao-aberto").hidden = false;
+})();
+</script>
+</body>
+</html>
