@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const RAIZ = path.resolve(__dirname, '..');
-const TIPOS = { '.html': 'text/html; charset=utf-8', '.ttf': 'font/ttf', '.svg': 'image/svg+xml' };
+const TIPOS = { '.html': 'text/html; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
 const FORMS_VAZIO = 'var FORMS_URL = "";';
 
 // Serve a landing do disco. Com `formsUrl`, troca o único valor do Portão em memória.

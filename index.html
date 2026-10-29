@@ -4,113 +4,194 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aurora — teste fechado no Android</title>
-<meta name="description" content="Ajude a testar o Aurora, um app Android para executar as seis práticas da manhã. Teste fechado de 14 dias.">
+<meta name="description" content="Cuide de você antes que o dia comece. Ajude a testar o Aurora, um app Android de rotina matinal com seis práticas. Teste fechado de 14 dias.">
+<meta name="theme-color" content="#F8F9FF">
+<link rel="canonical" href="https://auroramanha.com.br/">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Aurora — teste fechado no Android">
+<meta property="og:description" content="Cuide de você antes que o dia comece. Ajude a testar o Aurora, um app Android de rotina matinal com seis práticas.">
+<meta property="og:url" content="https://auroramanha.com.br/">
+<meta property="og:image" content="https://auroramanha.com.br/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <style>
-@font-face{font-family:Roboto;font-weight:400;font-style:normal;font-display:swap;src:url(fonts/Roboto-Regular.ttf) format("truetype")}
-@font-face{font-family:Roboto;font-weight:500;font-style:normal;font-display:swap;src:url(fonts/Roboto-Medium.ttf) format("truetype")}
+@font-face{font-family:Roboto;font-weight:400;font-style:normal;font-display:swap;src:local("Roboto"),url(fonts/Roboto-Regular.woff2) format("woff2")}
+@font-face{font-family:Roboto;font-weight:500;font-style:normal;font-display:swap;src:local("Roboto Medium"),url(fonts/Roboto-Medium.woff2) format("woff2")}
 :root{
   color-scheme:light;
   --bg:#F8F9FF;
   --ink:#191C20;
+  --ink-soft:#2A2F37;
   --mut:#545F70;
   --primary:#3A608F;
+  --primary-press:#2E4F7A;
   --on-primary:#FFFFFF;
-  --card:#EDF0F8;
+  --card:#EDEDF4;
   --chip:#D8E3F8;
+  --band:#E1E2E9;
+  --ink-band:#3F4651;
+  --line:#C3C6CF;
   --outline:#73777F;
-  --space-sm:8px;--space-md:12px;--space-lg:16px;--space-xl:24px;--space-xxl:32px;--space-section:48px;
+  --space-sm:8px;--space-md:12px;--space-lg:16px;--space-xl:24px;--space-section:72px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Roboto,system-ui,sans-serif;letter-spacing:.5px}
-main,header,footer{max-width:40rem;margin:0 auto;padding-left:var(--space-lg);padding-right:var(--space-lg)}
-header{padding-top:var(--space-xl);display:flex;align-items:center;gap:var(--space-md)}
-.marca{font-weight:500;font-size:20px;letter-spacing:.15px}
-section{padding:var(--space-section) 0 0}
-h1{font-size:36px;line-height:1.15;font-weight:400;margin:var(--space-xl) 0 var(--space-lg);letter-spacing:0}
-h2{font-size:24px;line-height:1.29;font-weight:400;margin:0 0 var(--space-lg);letter-spacing:0}
-p{margin:0 0 var(--space-lg)}
-.lead{font-size:18px}
-.mut{color:var(--mut)}
-.chips{list-style:none;margin:var(--space-lg) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:var(--space-sm)}
-.chips li{background:var(--chip);color:var(--mut);border-radius:8px;padding:var(--space-sm) var(--space-md);font-weight:500;font-size:14px;letter-spacing:.5px}
-.passos{list-style:none;margin:0;padding:0;display:grid;gap:var(--space-md)}
-.passos li{background:var(--card);border-radius:12px;padding:var(--space-lg);display:grid;grid-template-columns:32px 1fr;gap:var(--space-md);align-items:start}
-.passos .n{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--primary);color:var(--on-primary);font-weight:500}
-.passos strong{font-weight:500}
-.cadastro{background:var(--card);border-radius:16px;padding:var(--space-xl)}
-.cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:48px;padding:0 var(--space-xl);border-radius:20px;background:var(--primary);color:var(--on-primary);font-weight:500;font-size:16px;letter-spacing:.15px;text-decoration:none}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.5 Roboto,system-ui,sans-serif;letter-spacing:.5px}
+::selection{background:var(--chip);color:var(--ink)}
+.miolo{max-width:72.5rem;margin:0 auto;padding-left:var(--space-lg);padding-right:var(--space-lg)}
+.hero{background:radial-gradient(60% 45% at 82% 90%,rgba(255,246,240,.95) 0,rgba(255,246,240,0) 70%),linear-gradient(180deg,#BED0F1 0%,#D9E4F8 55%,#F8F9FF 100%);padding-bottom:var(--space-section)}
+header{padding-top:var(--space-xl);display:flex;align-items:center;flex-wrap:wrap;gap:var(--space-md) var(--space-lg)}
+header img{width:40px;height:40px}
+.marca{font-weight:500;font-size:1.25rem;letter-spacing:.15px;margin-right:auto}
+.selo{background:var(--chip);color:var(--ink);border-radius:8px;padding:6px var(--space-md);font-size:.875rem;font-weight:500;letter-spacing:.25px}
+.hero-grade{display:grid;gap:var(--space-section) 64px;padding-top:var(--space-xl)}
+h1{font-size:2.25rem;line-height:1.1;font-weight:400;margin:var(--space-xl) 0 var(--space-xl);letter-spacing:-.5px;text-wrap:balance}
+h2{font-size:1.5rem;line-height:1.29;font-weight:400;margin:0 0 var(--space-lg);letter-spacing:0;text-wrap:balance}
+p{margin:0 0 var(--space-lg);text-wrap:pretty}
+strong{font-weight:500}
+.lead{font-size:1.125rem;letter-spacing:.25px}
+.suave{color:var(--ink-soft)}
+.apoio,.pequeno{font-size:.875rem;color:var(--mut)}
+.hero .apoio{color:var(--ink-soft);margin:0}
+.pequeno{margin:var(--space-lg) 0 0}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.mosaico{display:flex;gap:var(--space-lg);align-items:flex-start;max-width:34rem;margin:0 auto}
+.mosaico ul{flex:1 1 0;min-width:0;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--space-lg)}
+.mosaico ul+ul{margin-top:40px}
+.tile{border-radius:20px;padding:10px;display:flex;flex-direction:column;gap:10px}
+.tile img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:12px}
+.tile div{display:flex;flex-direction:column;gap:2px;padding:0 6px 6px}
+.tile b{font-weight:500;font-size:1.0625rem;letter-spacing:.15px}
+.tile span{font-size:.875rem;line-height:1.4;letter-spacing:.25px}
+.t-silencio{background:#E5E1E9;color:#3C3B41;order:1}
+.t-afirmacoes{background:#ECDFE5;color:#41393E;order:2}
+.t-visualizacao{background:#DDE4E3;color:#363D3C;order:3}
+.t-exercicio{background:#E1E4DA;color:#393D36;order:4}
+.t-leitura{background:#E7E2D5;color:#3D3C32;order:5}
+.t-diario{background:#EDE0D4;color:#413A32;order:6}
+.nota-mosaico{margin:var(--space-xl) auto 0;max-width:34rem;color:var(--ink-soft)}
+.faixa{background:var(--band)}
+.faixa .miolo{padding-top:var(--space-section);padding-bottom:var(--space-section)}
+.faixa h2{margin-bottom:40px}
+.passos{list-style:none;margin:0;padding:0;display:grid;gap:40px 32px}
+.passos li{display:flex;flex-direction:column;gap:var(--space-sm)}
+.passos .n{font-size:4rem;line-height:1;font-weight:400;letter-spacing:-1px;color:var(--primary-press)}
+.passos strong{font-size:1.25rem;line-height:1.3;letter-spacing:.15px;text-wrap:balance}
+.passos p{margin:0;color:var(--ink-band)}
+.status{background:var(--chip);color:var(--ink);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl);max-width:32.5rem}
+.status p:last-of-type{margin-bottom:0}
+.fechado{font-weight:500;font-size:1.125rem}
+.entrar-bloco{max-width:32.5rem}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:56px;min-width:48px;padding:0 40px;border:2px solid transparent;border-radius:28px;background:var(--primary);color:var(--on-primary);font-weight:500;font-size:1.0625rem;letter-spacing:.15px;text-decoration:none}
+.cta:hover{background:var(--primary-press)}
+.cta:active{background:var(--primary-press);opacity:.92}
 .cta:focus-visible,.link:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.link{display:flex;align-items:center;min-height:48px;color:var(--primary);font-weight:500;text-decoration:underline}
-.fechado{font-weight:500;margin:0}
+.link{display:inline-flex;align-items:center;min-height:48px;color:var(--primary-press);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.link:hover,.link:active{color:var(--primary)}
+.chamada{background:var(--chip)}
+.chamada .miolo{padding-top:64px;padding-bottom:64px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xl) 48px}
+.chamada h2{margin:0}
 [hidden]{display:none!important}
-footer{padding-top:var(--space-section);padding-bottom:var(--space-section);border-top:0}
-footer p{font-size:14px;color:var(--mut)}
-@media (min-width:600px){h1{font-size:45px;line-height:1.12}}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+footer{padding-top:var(--space-section);padding-bottom:var(--space-section)}
+footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
+@media (min-width:600px){h1{font-size:clamp(2.5rem,1.2rem + 3.6vw,3.75rem)}}
+@media (min-width:60rem){
+  .hero-grade{grid-template-columns:1fr 1.25fr;align-items:start;padding-top:var(--space-xl)}
+  .mosaico,.nota-mosaico{margin-left:0}
+  .mosaico{display:grid;grid-template-columns:repeat(3,1fr);max-width:none}
+  .mosaico ul{display:contents}
+  .mosaico .t-afirmacoes,.mosaico .t-leitura{margin-top:28px}
+  .tile{padding:8px;gap:8px}
+  .tile div{padding:0 4px 4px}
+  .tile b{font-size:1rem}
+  .passos{grid-template-columns:repeat(3,1fr)}
+}
 </style>
 </head>
 <body>
-<header>
-  <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="19" r="8" fill="#3A608F"/><rect x="2" y="19" width="28" height="3" rx="1.5" fill="#D8E3F8"/></svg>
-  <span class="marca">Aurora</span>
-</header>
-
 <main>
-  <section id="promessa" aria-labelledby="titulo">
-    <h1 id="titulo">Sua rotina da manhã, em poucos minutos por dia.</h1>
-    <p class="lead">O Aurora é um app para Android que reúne as seis práticas da manhã num só lugar: silêncio, afirmações, visualização, exercício, leitura e diário. Sem curso, sem desafio de 30 dias e sem comunidade. Só você e a sua rotina.</p>
-    <p>Estamos formando o grupo do <strong>teste fechado</strong>, só para quem usa Android. Antes de chegar à loja, o app precisa passar por um teste com pessoas de verdade. Você pode ajudar.</p>
-  </section>
+  <div class="hero">
+    <header class="miolo">
+      <img src="icon.png" width="40" height="40" alt="">
+      <span class="marca">Aurora</span>
+      <span class="selo">Teste fechado no Android</span>
+    </header>
 
-  <section id="praticas" aria-labelledby="titulo-praticas">
-    <h2 id="titulo-praticas">As seis práticas</h2>
-    <p>Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.</p>
-    <ul class="chips">
-      <li>Silêncio</li>
-      <li>Afirmações</li>
-      <li>Visualização</li>
-      <li>Exercício</li>
-      <li>Leitura</li>
-      <li>Diário</li>
-    </ul>
-  </section>
+    <section id="promessa" class="miolo hero-grade" aria-labelledby="titulo">
+      <div>
+        <h1 id="titulo">Cuide de você antes que o dia comece.</h1>
+        <p class="lead">O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.</p>
+        <p class="suave">Estamos formando o grupo do <strong>teste fechado</strong>: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.</p>
 
-  <section id="passos" aria-labelledby="titulo-passos">
-    <h2 id="titulo-passos">Como funciona o teste</h2>
-    <ol class="passos">
-      <li><span class="n" aria-hidden="true">1</span><span><strong>Entre na lista.</strong> Você entra com a sua conta Google e confirma que usa Android.</span></li>
-      <li><span class="n" aria-hidden="true">2</span><span><strong>Receba o convite.</strong> Mandamos por e-mail o link para instalar o app pela Google Play.</span></li>
-      <li><span class="n" aria-hidden="true">3</span><span><strong>Use por 14 dias seguidos.</strong> O Google exige que cada testador continue inscrito durante todo o período. Você só precisa manter o app instalado e abrir quando quiser.</span></li>
-    </ol>
-  </section>
-
-  <section id="cadastro" aria-labelledby="titulo-cadastro">
-    <h2 id="titulo-cadastro">Entrar na lista de testadores</h2>
-    <div class="cadastro">
-      <!-- Portão do teste fechado: com FORMS_URL vazio a landing fica fechada. Para abrir, cole a URL do formulário entre as aspas de FORMS_URL, no script ao fim da página. -->
-      <p id="portao-fechado" class="fechado">As inscrições ainda não abriram. Volte em breve.</p>
-      <div id="portao-aberto" hidden>
-        <p>Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, também pede um aviso quando o Aurora for lançado.</p>
-        <a id="entrar" class="cta" href="#cadastro" rel="noopener">Entrar na lista</a>
+        <!-- Portão do teste fechado: com FORMS_URL vazio a landing fica fechada. Para abrir, cole a URL do formulário entre as aspas de FORMS_URL, no script ao fim da página. -->
+        <div id="cadastro" class="status" data-fechado>
+          <p id="portao-fechado" class="fechado">As inscrições ainda não abriram. Volte em breve.</p>
+          <p>Dúvidas? Escreva para <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
+          <noscript><p>Se as inscrições já tiverem aberto, o botão de entrada só aparece com o JavaScript ativo.</p></noscript>
+        </div>
+        <div id="portao-aberto" class="entrar-bloco" data-aberto hidden>
+          <p class="suave">Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, marque a opção de aviso de lançamento.</p>
+          <a id="entrar" class="cta" data-entrar href="#cadastro-fim" rel="noopener">Entrar na lista</a>
+          <p class="apoio" style="margin-top:var(--space-lg)">Só para Android. O formulário abre no Google Forms; a política de privacidade, no rodapé, diz por quanto tempo guardamos os dados e como pedir a exclusão.</p>
+        </div>
       </div>
+
+      <div id="praticas">
+        <h2 class="sr">As seis práticas</h2>
+        <div class="mosaico">
+          <ul role="list">
+            <li class="tile t-silencio"><img src="assets/silencio.webp" width="480" height="480" alt="" decoding="async"><div><b>Silêncio</b><span>Abra um espaço de calma antes da correria.</span></div></li>
+            <li class="tile t-visualizacao"><img src="assets/visualizacao.webp" width="480" height="480" alt="" loading="lazy" decoding="async"><div><b>Visualização</b><span>Imagine com clareza como você quer viver o seu dia.</span></div></li>
+            <li class="tile t-leitura"><img src="assets/leitura.webp" width="480" height="480" alt="" loading="lazy" decoding="async"><div><b>Leitura</b><span>Crie o hábito de ler todos os dias.</span></div></li>
+          </ul>
+          <ul role="list">
+            <li class="tile t-afirmacoes"><img src="assets/afirmacoes.webp" width="480" height="480" alt="" decoding="async"><div><b>Afirmações</b><span>Comece o dia com frases que reforçam o que você quer cultivar.</span></div></li>
+            <li class="tile t-exercicio"><img src="assets/exercicio.webp" width="480" height="480" alt="" loading="lazy" decoding="async"><div><b>Exercício</b><span>Mova o corpo e mantenha a constância.</span></div></li>
+            <li class="tile t-diario"><img src="assets/diario.webp" width="480" height="480" alt="" loading="lazy" decoding="async"><div><b>Diário</b><span>Coloque pensamentos e gratidão no papel.</span></div></li>
+          </ul>
+        </div>
+        <p class="nota-mosaico">Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.</p>
+      </div>
+    </section>
+  </div>
+
+  <section id="passos" class="faixa" aria-labelledby="titulo-passos">
+    <div class="miolo">
+      <h2 id="titulo-passos">Como funciona o teste</h2>
+      <ol class="passos" role="list">
+        <li><span class="n" aria-hidden="true">1</span><strong>Entre na lista.</strong><p>Você entra com a sua conta Google e confirma que usa Android.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><strong>Receba o convite.</strong><p>Mandamos por e-mail o link para instalar o app pela Google Play.</p></li>
+        <li><span class="n" aria-hidden="true">3</span><strong>Use o app e dê feedback por no mínimo 14 dias.</strong><p>Use a rotina no seu dia a dia e envie o seu retorno durante todo o período do teste.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="cadastro-fim" class="chamada" data-aberto hidden>
+    <div class="miolo">
+      <h2>Pronto para ajudar?</h2>
+      <a class="cta" data-entrar href="#cadastro-fim" rel="noopener">Entrar na lista</a>
     </div>
   </section>
 </main>
 
-<footer>
+<footer class="miolo">
   <a class="link" href="https://ar-agencia-ia.github.io/aurora-releases/privacidade/">Política de privacidade</a>
   <p>O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.</p>
-  <p>Esta página não usa cookies, rastreadores nem serviços de terceiros.</p>
+  <p>O Aurora não substitui orientação médica ou psicológica.</p>
+  <p>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.</p>
+  <p>Dúvidas ou pedido de exclusão: <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
 </footer>
 
 <script>
 (function () {
   var FORMS_URL = "";
   if (!FORMS_URL) return;
-  document.getElementById("entrar").setAttribute("href", FORMS_URL);
-  document.getElementById("portao-fechado").hidden = true;
-  document.getElementById("portao-aberto").hidden = false;
+  document.querySelectorAll("[data-entrar]").forEach(function (a) { a.setAttribute("href", FORMS_URL); });
+  document.querySelectorAll("[data-fechado]").forEach(function (el) { el.hidden = true; });
+  document.querySelectorAll("[data-aberto]").forEach(function (el) { el.hidden = false; });
 })();
 </script>
 </body>

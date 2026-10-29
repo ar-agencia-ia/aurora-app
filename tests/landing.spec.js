@@ -47,12 +47,17 @@ test('abrir o Portão mostra Entrar na lista com a URL do Forms', async ({ page 
   try {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto(aberto.url, { waitUntil: 'networkidle' });
-    const botao = page.getByRole('link', { name: 'Entrar na lista' });
-    await expect(botao).toBeVisible();
-    await expect(botao).toHaveAttribute('href', 'https://forms.example.test/aurora-teste');
+    const botoes = page.getByRole('link', { name: 'Entrar na lista' });
+    await expect(botoes).toHaveCount(2);
+    for (const botao of await botoes.all()) {
+      await expect(botao).toBeVisible();
+      await expect(botao).toHaveAttribute('href', 'https://forms.example.test/aurora-teste');
+    }
     await expect(page.getByText('As inscrições ainda não abriram.')).toBeHidden();
-    const alvo = await botao.boundingBox();
-    expect(alvo.height).toBeGreaterThanOrEqual(48);
+    for (const botao of await botoes.all()) {
+      const alvo = await botao.boundingBox();
+      expect(alvo.height).toBeGreaterThanOrEqual(48);
+    }
   } finally {
     aberto.fechar();
   }
