@@ -88,6 +88,42 @@ test('composição da landing', async ({ page }) => {
   }
 });
 
+test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', async ({ page }) => {
+  const frases = [
+    'Abra um espaço de calma antes da correria.',
+    'Imagine com clareza como você quer viver o seu dia.',
+    'Crie o hábito de ler todos os dias.',
+    'Comece o dia com frases que reforçam o que você quer cultivar.',
+    'Mova o corpo e mantenha a constância.',
+    'Coloque pensamentos e gratidão no papel.',
+  ];
+  const textosPassos = [
+    'Você entra com a sua conta Google e confirma que usa Android.',
+    'Mandamos por e-mail o link para instalar o app pela Google Play.',
+    'Use a rotina no seu dia a dia e envie o seu retorno durante todo o período do teste.',
+  ];
+  for (const estado of ['fechado', 'aberto']) {
+    const alvo = await iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+    try {
+      await page.goto(alvo.url, { waitUntil: 'networkidle' });
+      await expect(page.locator('header .selo'), estado).toHaveText('Teste fechado no Android');
+      // ordem do DOM: Silêncio, Visualização, Leitura, Afirmações, Exercício, Diário
+      expect(await page.locator('#praticas .tile span').allTextContents(), estado).toEqual(frases);
+      expect(await page.locator('#passos ol > li p').allTextContents(), estado).toEqual(textosPassos);
+      const banda = page.locator('#cadastro-fim');
+      if (estado === 'aberto') {
+        await expect(banda).toBeVisible();
+        await expect(banda.getByRole('heading', { name: 'Pronto para ajudar?' })).toBeVisible();
+      } else {
+        await expect(banda).toBeHidden();
+        await expect(page.getByText('Pronto para ajudar?')).toBeHidden();
+      }
+    } finally {
+      alvo.fechar();
+    }
+  }
+});
+
 test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canvas', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(site.url, { waitUntil: 'networkidle' });
@@ -129,6 +165,12 @@ test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canv
   expect(por['Leitura'].y - por['Diário'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
   expect(Math.abs(por['Silêncio'].y - por['Visualização'].y), 'Silêncio e Visualização alinhados').toBeLessThan(2);
   expect(Math.abs(por['Exercício'].y - por['Diário'].y), 'Exercício e Diário alinhados').toBeLessThan(2);
+  // passos: 3 colunas na mesma linha
+  const passos = [];
+  for (const el of await page.locator('#passos ol > li').all()) passos.push(await el.boundingBox());
+  expect(passos, 'passos').toHaveLength(3);
+  expect(new Set(passos.map((b) => arred(b.x))).size, 'passos em 3 colunas').toBe(3);
+  expect(Math.max(...passos.map((b) => b.y)) - Math.min(...passos.map((b) => b.y)), 'passos na mesma linha').toBeLessThan(2);
 });
 
 test('abrir o Portão mostra Entrar na lista com a URL do Forms', async ({ page }) => {
