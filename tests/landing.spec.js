@@ -214,6 +214,93 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
   }
 });
 
+test('estrutura semântica, arranjo do hero e head nos dois estados', async ({ page }) => {
+  const metas = {
+    'meta[name="viewport"]': 'width=device-width, initial-scale=1',
+    'meta[name="description"]': 'Cuide de você antes que o dia comece. Ajude a testar o Aurora, um app Android de rotina matinal com seis práticas. Teste fechado de 14 dias.',
+    'meta[name="theme-color"]': '#F8F9FF',
+    'meta[property="og:type"]': 'website',
+    'meta[property="og:locale"]': 'pt_BR',
+    'meta[property="og:title"]': 'Aurora — teste fechado no Android',
+    'meta[property="og:description"]': 'Cuide de você antes que o dia comece. Ajude a testar o Aurora, um app Android de rotina matinal com seis práticas.',
+    'meta[property="og:image"]': 'https://auroramanha.com.br/og.png',
+    'meta[property="og:image:width"]': '1200',
+    'meta[property="og:image:height"]': '630',
+  };
+  for (const estado of ['fechado', 'aberto']) {
+    const alvo = await iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+    try {
+      await page.goto(alvo.url, { waitUntil: 'networkidle' });
+      // head: viewport (sem ele o celular do anúncio renderiza a 980 px), título e pré-visualização do anúncio
+      await expect(page, estado).toHaveTitle('Aurora — teste fechado no Android');
+      for (const [seletor, valor] of Object.entries(metas)) {
+        await expect(page.locator(seletor), `${estado} ${seletor}`).toHaveCount(1);
+        await expect(page.locator(seletor), `${estado} ${seletor}`).toHaveAttribute('content', valor);
+      }
+      await expect(page.locator('link[rel="icon"]'), estado).toHaveAttribute('href', 'icon.png');
+      await expect(page.locator('link[rel="apple-touch-icon"]'), estado).toHaveAttribute('href', 'icon.png');
+      const css = await page.locator('style').first().textContent();
+      for (const fonte of ['Roboto-Regular', 'Roboto-Medium']) {
+        expect(css, `${estado} ${fonte}`).toContain(`url(fonts/${fonte}.woff2)`);
+        expect((await page.request.get(`${alvo.url}fonts/${fonte}.woff2`)).status(), `${estado} ${fonte}`).toBe(200);
+      }
+
+      // <main> com hero, mosaico, passos e banda; <footer> fora dele
+      const main = page.getByRole('main');
+      await expect(main, estado).toHaveCount(1);
+      for (const q of ['.hero', '#promessa', '#praticas', '#passos', '#cadastro-fim']) {
+        await expect(main.locator(q), `${estado} ${q} dentro do main`).toHaveCount(1);
+      }
+      await expect(page.getByRole('contentinfo'), estado).toHaveCount(1);
+      await expect(main.locator('footer'), estado).toHaveCount(0);
+      expect(await page.locator('footer').evaluate((f) => f.parentElement.tagName), estado).toBe('BODY');
+      // passos: <section> com nome acessível, <ol> de 3 itens
+      expect(await page.locator('#passos').evaluate((e) => e.tagName), estado).toBe('SECTION');
+      await expect(page.getByRole('region', { name: 'Como funciona o teste', exact: true }), estado).toHaveCount(1);
+      await expect(page.locator('#passos').getByRole('list'), estado).toHaveCount(1);
+      await expect(page.locator('#passos').getByRole('listitem'), estado).toHaveCount(3);
+      // mosaico: 2 listas e 6 <li class="tile">
+      const tiles = page.locator('#praticas .tile');
+      await expect(tiles, estado).toHaveCount(6);
+      expect(await tiles.evaluateAll((els) => els.map((e) => e.tagName)), estado).toEqual(Array(6).fill('LI'));
+      await expect(page.locator('#praticas').getByRole('list'), estado).toHaveCount(2);
+      await expect(page.locator('#praticas').getByRole('listitem'), estado).toHaveCount(6);
+
+      // coluna do hero: h1, lead, suave, depois o Portão (fechado e aberto)
+      const ordem = await page.evaluate(() => {
+        const els = ['#promessa h1', '#promessa p.lead', '#promessa p.suave', '#cadastro', '#portao-aberto'].map((q) => document.querySelector(q));
+        return els.slice(1).map((el, i) => Boolean(els[i].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
+      });
+      expect(ordem, estado).toEqual([true, true, true, true]);
+      const lead = await page.locator('#promessa p.lead').boundingBox();
+      const portao = await page.locator(estado === 'aberto' ? '#portao-aberto' : '#cadastro').boundingBox();
+      expect(portao.y, `${estado} Portão abaixo do lead`).toBeGreaterThanOrEqual(lead.y + lead.height);
+
+      // nota do mosaico dentro de #praticas, depois do mosaico
+      await expect(page.locator('.nota-mosaico'), estado).toHaveCount(1);
+      await expect(page.locator('#praticas > .nota-mosaico'), estado).toHaveCount(1);
+      expect(await page.evaluate(() => Boolean(document.querySelector('.mosaico').compareDocumentPosition(document.querySelector('.nota-mosaico')) & Node.DOCUMENT_POSITION_FOLLOWING)), estado).toBe(true);
+
+      // h2 "As seis práticas": no leitor de tela, invisível na tela (1 x 1 px)
+      await expect(page.getByRole('heading', { level: 2, name: 'As seis práticas', exact: true }), estado).toHaveCount(1);
+      const sr = await page.locator('#praticas h2.sr').boundingBox();
+      expect(sr.width, estado).toBeLessThanOrEqual(1);
+      expect(sr.height, estado).toBeLessThanOrEqual(1);
+
+      // cabeçalho: logo, nome e selo nessa ordem, no DOM e na tela
+      const logo = page.locator('header > img');
+      await expect(logo, estado).toHaveAttribute('src', 'icon.png');
+      const dom = await page.locator('header > *').evaluateAll((els) => els.map((e) => e.tagName + (e.className ? '.' + e.className : '')));
+      expect(dom, estado).toEqual(['IMG', 'SPAN.marca', 'SPAN.selo']);
+      const [l, m, s] = [await logo.boundingBox(), await page.locator('header .marca').boundingBox(), await page.locator('header .selo').boundingBox()];
+      expect(l.x + l.width, `${estado} logo antes do nome`).toBeLessThanOrEqual(m.x);
+      expect(m.x + m.width, `${estado} nome antes do selo`).toBeLessThanOrEqual(s.x);
+    } finally {
+      alvo.fechar();
+    }
+  }
+});
+
 test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canvas', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(site.url, { waitUntil: 'networkidle' });
