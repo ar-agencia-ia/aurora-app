@@ -383,3 +383,248 @@ test('rodapé aponta para a política no próprio domínio, igual à fonte e sem
   await expect(page.getByRole('heading', { name: /Recrutamento de testadores/ })).toBeVisible();
   expect([...origens]).toEqual([new URL(site.url).origin]);
 });
+// AC 13 (sem depoimento, estrelas nem contagem de usuários) por mundo fechado: todo o texto visível da página
+// é exatamente a lista do canvas VersaoC3.dc.html (sha256 0e6b8221...) mais as divergências de propósito do C33
+// (e-mail contato@auroramanha.com.br no lugar do Gmail, frase de terceiros e GitHub Pages, <noscript> fora da tela).
+// Texto acrescentado em qualquer ponto (antes de </main>, nos passos, na banda, no rodapé) muda a lista e falha.
+test("mundo fechado: o texto visível é só o do canvas e não há depoimento, citação nem figura", async ({
+  page,
+}) => {
+  const marca = [
+    "Aurora",
+    "Teste fechado no Android",
+    "Cuide de você antes que o dia comece.",
+  ];
+  const hero = [
+    "O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.",
+    "Estamos formando o grupo do teste fechado: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.",
+  ];
+  const meio = [
+    "As seis práticas",
+    "Silêncio",
+    "Abra um espaço de calma antes da correria.",
+    "Visualização",
+    "Imagine com clareza como você quer viver o seu dia.",
+    "Leitura",
+    "Crie o hábito de ler todos os dias.",
+    "Afirmações",
+    "Comece o dia com frases que reforçam o que você quer cultivar.",
+    "Exercício",
+    "Mova o corpo e mantenha a constância.",
+    "Diário",
+    "Coloque pensamentos e gratidão no papel.",
+    "Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.",
+    "Como funciona o teste",
+    "1",
+    "Entre na lista.",
+    "Você entra com a sua conta Google e confirma que usa Android.",
+    "2",
+    "Receba o convite.",
+    "Mandamos por e-mail o link para instalar o app pela Google Play.",
+    "3",
+    "Use o app e dê feedback por no mínimo 14 dias.",
+    "Use a rotina no seu dia a dia e envie o seu retorno durante todo o período do teste.",
+  ];
+  const rodape = [
+    "Política de privacidade",
+    "O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.",
+    "O Aurora não substitui orientação médica ou psicológica.",
+    "Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.",
+    `Dúvidas ou pedido de exclusão: ${EMAIL}.`,
+  ];
+  const esperado = {
+    fechado: [
+      ...marca,
+      ...hero,
+      "As inscrições ainda não abriram. Volte em breve.",
+      `Dúvidas? Escreva para ${EMAIL}.`,
+      ...meio,
+      ...rodape,
+    ],
+    aberto: [
+      ...marca,
+      ...hero,
+      "Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, marque a opção de aviso de lançamento.",
+      "Entrar na lista",
+      "Só para Android. O formulário abre no Google Forms; a política de privacidade, no rodapé, diz por quanto tempo guardamos os dados e como pedir a exclusão.",
+      ...meio,
+      "Pronto para ajudar?",
+      "Entrar na lista",
+      ...rodape,
+    ],
+  };
+  for (const estado of ["fechado", "aberto"]) {
+    const alvo = await iniciar(
+      estado === "aberto" ? { formsUrl: FORMS_TESTE } : {},
+    );
+    try {
+      for (const largura of [360, 1280]) {
+        await page.setViewportSize({ width: largura, height: 900 });
+        await page.goto(alvo.url, { waitUntil: "networkidle" });
+        const linhas = await page.evaluate(() =>
+          document.body.innerText
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean),
+        );
+        expect(linhas, `${estado} ${largura} px`).toEqual(esperado[estado]);
+        // marcação de depoimento, citação, figura ou avaliação estruturada: contagem 0
+        await expect(
+          page.locator(
+            'blockquote, q, cite, figure, figcaption, [itemprop], [itemscope], script[type="application/ld+json"]',
+          ),
+          `${estado} ${largura} px`,
+        ).toHaveCount(0);
+      }
+    } finally {
+      alvo.fechar();
+    }
+  }
+});
+
+// O13/O11: foco, hover, sublinhado, tag das seções, charset, forma e tipografia que o canvas desenha
+test("interação, forma e tipografia do canvas nos dois estados", async ({
+  page,
+}) => {
+  for (const estado of ["fechado", "aberto"]) {
+    const alvo = await iniciar(
+      estado === "aberto" ? { formsUrl: FORMS_TESTE } : {},
+    );
+    try {
+      await page.setViewportSize({ width: 360, height: 800 });
+      await page.goto(alvo.url, { waitUntil: "networkidle" });
+      // <meta charset> e tag das seções
+      await expect(page.locator("meta[charset]"), estado).toHaveCount(1);
+      await expect(page.locator("meta[charset]"), estado).toHaveAttribute(
+        "charset",
+        /^utf-8$/i,
+      );
+      for (const id of ["#promessa", "#passos", "#cadastro-fim"]) {
+        expect(
+          await page.locator(id).evaluate((e) => e.tagName),
+          `${estado} ${id}`,
+        ).toBe("SECTION");
+      }
+      // foco visível por teclado em todo link, contorno de 3 px; sublinhado nos links do texto
+      const total = await page.locator("a:visible").count();
+      expect(total, estado).toBeGreaterThan(0);
+      await page.evaluate(
+        () => document.activeElement && document.activeElement.blur(),
+      );
+      for (let i = 0; i < total; i++) {
+        await page.keyboard.press("Tab");
+        const foco = await page.evaluate(() => {
+          const s = getComputedStyle(document.activeElement);
+          return {
+            tag: document.activeElement.tagName,
+            estilo: s.outlineStyle,
+            largura: parseFloat(s.outlineWidth),
+          };
+        });
+        expect(foco.tag, `${estado} foco ${i}`).toBe("A");
+        expect(foco.estilo, `${estado} foco ${i}`).toBe("solid");
+        expect(foco.largura, `${estado} foco ${i}`).toBeGreaterThanOrEqual(3);
+      }
+      for (const link of await page.locator("a.link:visible").all()) {
+        expect(
+          await link.evaluate((e) => getComputedStyle(e).textDecorationLine),
+          estado,
+        ).toContain("underline");
+      }
+      // CTA: mesma aba (sem target), rel noopener, hover muda o fundo
+      if (estado === "aberto") {
+        for (const cta of await page.locator("a.cta").all()) {
+          await expect(cta, estado).not.toHaveAttribute("target", /.*/);
+          await expect(cta, estado).toHaveAttribute("rel", "noopener");
+        }
+        const cta = page.locator("a.cta").first();
+        const antes = await cta.evaluate(
+          (e) => getComputedStyle(e).backgroundColor,
+        );
+        await cta.hover();
+        expect(
+          await cta.evaluate((e) => getComputedStyle(e).backgroundColor),
+          `${estado} hover do CTA`,
+        ).not.toBe(antes);
+      }
+      // tipografia: Roboto sem serifa; tamanhos mínimos de h1, h2, corpo, rodapé e numerais dos passos
+      const tipo = await page.evaluate(() => {
+        const px = (q) =>
+          parseFloat(getComputedStyle(document.querySelector(q)).fontSize);
+        return {
+          familia: getComputedStyle(document.body).fontFamily,
+          h1: px("h1"),
+          h2: px("#titulo-passos"),
+          corpo: px("p.lead"),
+          apoio: px("footer p"),
+          numeral: px("#passos .n"),
+        };
+      });
+      expect(tipo.familia, estado).toMatch(/^Roboto/);
+      expect(tipo.h1, `${estado} h1`).toBeGreaterThanOrEqual(36);
+      expect(tipo.h2, `${estado} h2`).toBeGreaterThanOrEqual(24);
+      expect(tipo.corpo, `${estado} corpo`).toBeGreaterThanOrEqual(16);
+      expect(tipo.apoio, `${estado} rodapé`).toBeGreaterThanOrEqual(14);
+      expect(tipo.numeral, `${estado} numerais`).toBeGreaterThanOrEqual(48);
+      // forma: faixa dos passos e banda com fundo; tiles com raio, imagem 1:1; mosaico em 2 colunas a 360 px (O11)
+      for (const id of ["#passos", "#cadastro-fim"]) {
+        expect(
+          await page
+            .locator(id)
+            .evaluate((e) => getComputedStyle(e).backgroundColor),
+          `${estado} fundo ${id}`,
+        ).not.toBe("rgba(0, 0, 0, 0)");
+      }
+      for (const tile of await page.locator(".tile").all()) {
+        expect(
+          await tile.evaluate((e) =>
+            parseFloat(getComputedStyle(e).borderTopLeftRadius),
+          ),
+          estado,
+        ).toBeGreaterThanOrEqual(16);
+        const img = await tile.locator("img").boundingBox();
+        expect(
+          Math.abs(img.width - img.height),
+          `${estado} imagem 1:1`,
+        ).toBeLessThan(1);
+      }
+      const xs = await page
+        .locator(".tile")
+        .evaluateAll((els) =>
+          els.map((e) => Math.round(e.getBoundingClientRect().x)),
+        );
+      expect(new Set(xs).size, `${estado} mosaico em 2 colunas a 360 px`).toBe(
+        2,
+      );
+    } finally {
+      alvo.fechar();
+    }
+  }
+});
+
+test("a 1600 px: mosaico deslocado 28 px, hero alinhado ao topo e .miolo com largura máxima", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await page.goto(site.url, { waitUntil: "networkidle" });
+  const y = async (q) => (await page.locator(q).first().boundingBox()).y;
+  expect(
+    Math.round((await y(".t-afirmacoes")) - (await y(".t-silencio"))),
+    "Afirmações deslocada",
+  ).toBe(28);
+  expect(
+    Math.round((await y(".t-leitura")) - (await y(".t-exercicio"))),
+    "Leitura deslocada",
+  ).toBe(28);
+  // alinhado ao topo: o h1 (margem de 24 px) e o mosaico começam a menos de 48 px um do outro
+  expect(
+    Math.abs((await y("#promessa h1")) - (await y(".mosaico"))),
+    "hero alinhado ao topo",
+  ).toBeLessThan(48);
+  for (const q of ["#promessa", "#passos .miolo", "footer"]) {
+    expect(
+      (await page.locator(q).first().boundingBox()).width,
+      `${q} limitado`,
+    ).toBeLessThanOrEqual(1160);
+  }
+});
