@@ -193,3 +193,16 @@ test('abrir o Portão mostra Entrar na lista com a URL do Forms', async ({ page 
     aberto.fechar();
   }
 });
+
+test('rodapé aponta para a política no próprio domínio, igual à fonte e sem terceiros', async ({ page }) => {
+  await page.goto(site.url, { waitUntil: 'networkidle' });
+  const link = page.locator('footer').getByRole('link', { name: 'Política de privacidade' });
+  await expect(link).toHaveAttribute('href', '/privacidade/');
+
+  const origens = new Set();
+  page.on('request', (r) => origens.add(new URL(r.url()).origin));
+  await Promise.all([page.waitForURL('**/privacidade/'), link.click()]);
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('heading', { name: /Recrutamento de testadores/ })).toBeVisible();
+  expect([...origens]).toEqual([new URL(site.url).origin]);
+});

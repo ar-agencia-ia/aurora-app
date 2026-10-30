@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de privacidade — Aurora</title>
+<style>
+:root{color-scheme:light dark;--bg:#fff;--fg:#1d1b20;--mut:#5f5b66}
+@media (prefers-color-scheme:dark){:root{--bg:#141218;--fg:#e6e0e9;--mut:#a9a3b0}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}
+main{max-width:42rem;margin:0 auto;padding:1.5rem 1rem 4rem}
+h1{font-size:1.6rem}h2{font-size:1.15rem;margin-top:2rem}
+p,li{margin:.5rem 0}.mut{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<h1>Política de privacidade do Aurora</h1>
+<p class="mut">Última atualização: 29 de outubro de 2026</p>
+<p>O Aurora é um aplicativo Android de práticas diárias (silêncio, afirmações, leitura, diário, exercício e visualização). Este documento explica quais dados o app trata, para quê, e como você exerce seus direitos. Responsável: Alexandre Leobons Souza.</p>
+
+<h2>1. Dados que ficam no seu aparelho</h2>
+<p>Suas práticas, notas, entradas de diário, afirmações, leituras, exercícios e configurações ficam salvas no aparelho, cifradas. Sem criar conta, nada disso sai do aparelho.</p>
+
+<h2>2. Conta e login</h2>
+<p>Se você entrar com o Google, tratamos seu identificador de conta, nome, e-mail e foto, fornecidos pelo Google, para autenticar você e identificar sua assinatura e seus créditos. Esses dados ficam no nosso backend (Supabase).</p>
+
+<h2>3. Sincronização entre aparelhos (Premium)</h2>
+<p>Se você é assinante Premium, suas práticas e seus textos sincronizam com o nosso backend para aparecerem nos aparelhos da sua própria conta. Só você tem acesso; nunca são compartilhados com outros usuários.</p>
+
+<h2>4. Recursos de IA</h2>
+<p>Ao usar "Gerar com IA", o texto que você fornece é enviado a um provedor de modelos de linguagem (OpenRouter) para gerar a resposta. Pedimos ao provedor retenção zero de dados e que não use o conteúdo para treinamento.</p>
+<p>Para medir a qualidade das gerações, enviamos ao Langfuse (Estados Unidos) apenas metadados de uso (operação, versão do critério, modelo, tempo, tokens, custo e resultado), ligados a um identificador anônimo da conta. Se você ligar "Compartilhar textos da IA para melhoria" no Perfil, o Langfuse também recebe o texto que você fornece e a resposta da IA. Você pode desligar quando quiser, mas o que já foi enviado pode continuar no Langfuse mesmo depois de desligar ou de excluir a conta.</p>
+
+<h2>5. Health Connect (exercício)</h2>
+<p>Durante uma sessão de exercício, o app lê passos, distância, calorias ativas e frequência cardíaca do Health Connect, só entre o início e o fim da sessão. As métricas ficam salvas junto com a sessão, no aparelho, cifradas. Se você é assinante Premium, elas sincronizam com o nosso backend, só para os aparelhos da sua própria conta (seção 3). O Aurora nunca escreve dados no Health Connect e nunca envia suas métricas de saúde para serviços de análise ou publicidade de terceiros. Você pode revogar a permissão em Configurações do Android &gt; Apps &gt; Aurora &gt; Permissões, ou em Health Connect &gt; Apps com acesso.</p>
+
+<h2>6. Relatórios de erro e uso</h2>
+<p>Usamos o Sentry para receber relatórios de falha, com remoção de dados sensíveis antes do envio, e o PostHog para liberar funcionalidades de forma gradual (sinalizadores de funcionalidade). Esses serviços recebem dados técnicos do app e do aparelho, e um identificador de conta, não o conteúdo das suas práticas.</p>
+
+<h2>7. Compras</h2>
+<p>Assinaturas e créditos avulsos são processados pelo Google Play. Não recebemos os dados do seu cartão. Recebemos do Google Play a confirmação da compra para liberar o benefício.</p>
+
+<h2>8. Publicidade</h2>
+<p>O app Aurora não exibe anúncios, não usa ID de publicidade e não vende seus dados.</p>
+<p>Os anúncios que convidam pessoas para o teste fechado (seção 9) são comprados por nós no Meta (Instagram e Facebook), fora do app.</p>
+
+<h2>9. Recrutamento de testadores</h2>
+<p>Para lançar o Aurora no Android, o Google Play exige um teste fechado com pelo menos 12 testadores por 14 dias seguidos. O convite é divulgado em anúncios no Meta e numa página de convite, ambos fora do app. Esta seção vale só para quem se inscreve nessa página.</p>
+<p><strong>Dados:</strong> o Google Forms coleta o seu endereço Gmail (verificado pelo login Google), a confirmação de que você usa um celular Android, o aceite do teste fechado e, se você marcar, o pedido de aviso de lançamento (opcional, desmarcado por padrão).</p>
+<p><strong>Para que usamos:</strong> a finalidade é cadastrar o seu Gmail como testador na faixa de teste fechado do Google Play, enviar o convite e lembretes do teste (nos dias 0, 3, 7 e 12) e, só se você marcou, avisar quando o Aurora for lançado. Não usamos esses dados para outra coisa e não os vendemos.</p>
+<p><strong>Quem trata:</strong> as respostas ficam no Google Forms, na conta Google do responsável, e o Google Play recebe o seu Gmail para o cadastro como testador. A página de convite não usa Pixel, cookies nem scripts de terceiros; ela é hospedada no GitHub Pages, que, como qualquer servidor, registra o endereço IP de quem acessa.</p>
+<p><strong>Por quanto tempo:</strong> apagamos os dados em até 30 dias após o fim do teste fechado ou do seu pedido de saída. Para quem marcou o aviso de lançamento, apagamos em até 30 dias após o lançamento. Para sair da lista ou pedir a exclusão antes, escreva para <a href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
+
+
+<h2>10. Seus direitos e exclusão de dados</h2>
+<p>Você pode ler, corrigir e apagar seus dados dentro do app.</p>
+<h3 id="exclusao-de-conta">Como excluir sua conta e seus dados</h3>
+<p>Este é o fluxo de exclusão de conta e de dados do aplicativo Aurora (Alexandre Leobons Souza).</p>
+<ol>
+<li>No app, abra Perfil &gt; Excluir conta e confirme.</li>
+<li>Se você não tem mais o app instalado, escreva para <a href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a> com o assunto "Excluir conta Aurora", a partir do e-mail da conta. Respondemos e apagamos os dados em até 30 dias.</li>
+</ol>
+<p><strong>O que é apagado:</strong> sua conta e tudo associado a ela no nosso backend (Supabase): dados de login (nome, e-mail, foto, identificador), práticas, afirmações, leituras, diário, exercícios (inclusive as métricas do Health Connect sincronizadas), configurações, assinatura, créditos e histórico de compras. A exclusão é imediata e definitiva. Os dados guardados no aparelho também são apagados. Se você tem assinatura ativa, ela é cancelada no Google Play antes da exclusão para não haver novas cobranças; se o cancelamento falhar, a exclusão é interrompida e você pode tentar de novo.</p>
+<p><strong>O que pode permanecer, e por quanto tempo:</strong></p>
+<ul>
+<li>Textos enviados ao Langfuse, apenas se você tinha ligado "Compartilhar textos da IA para melhoria": ficam lá até você pedir a remoção pelo e-mail acima (seção 4). Os metadados de uso do Langfuse não contêm o conteúdo dos seus textos.</li>
+<li>Relatórios de falha no Sentry, sem o conteúdo das suas práticas: expiram sozinhos pelo prazo de retenção do serviço (até 90 dias).</li>
+<li>O registro das suas compras no Google Play, que pertence ao Google e segue a política dele, fora do nosso controle.</li>
+</ul>
+<p>Você também pode pedir acesso ou correção dos seus dados pelo mesmo e-mail, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018).</p>
+
+<h2>11. Crianças</h2>
+<p>O Aurora é destinado a maiores de 18 anos e não coleta intencionalmente dados de menores.</p>
+
+<h2>12. Alterações</h2>
+<p>Se esta política mudar, a data acima será atualizada e, em mudanças relevantes, avisaremos no app.</p>
+
+<h2>13. Contato</h2>
+<p>Alexandre Leobons Souza — <a href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a></p>
+<p>As mensagens enviadas a esse endereço passam pelo Cloudflare, que encaminha o e-mail para a caixa do responsável; as respostas enviadas como esse endereço passam pelo Resend, que só as entrega ao destinatário. As mensagens ficam guardadas só para responder ao seu pedido.</p>
+</main>
+</body>
+</html>

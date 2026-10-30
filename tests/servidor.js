@@ -10,13 +10,13 @@ const FORMS_VAZIO = 'var FORMS_URL = "";';
 function iniciar({ formsUrl } = {}) {
   const servidor = http.createServer((req, res) => {
     const rota = req.url.split('?')[0];
-    const arquivo = path.join(RAIZ, rota === '/' ? 'index.html' : rota);
+    const arquivo = path.join(RAIZ, rota.endsWith('/') ? rota + 'index.html' : rota);
     if (!arquivo.startsWith(RAIZ) || !fs.existsSync(arquivo) || fs.statSync(arquivo).isDirectory()) {
       res.writeHead(404);
       return res.end();
     }
     let corpo = fs.readFileSync(arquivo);
-    if (formsUrl && path.basename(arquivo) === 'index.html') {
+    if (formsUrl && arquivo === path.join(RAIZ, 'index.html')) {
       const html = corpo.toString('utf8');
       if (!html.includes(FORMS_VAZIO)) throw new Error('valor do Portão não encontrado em index.html');
       corpo = Buffer.from(html.replace(FORMS_VAZIO, `var FORMS_URL = ${JSON.stringify(formsUrl)};`));
