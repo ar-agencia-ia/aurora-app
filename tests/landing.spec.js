@@ -487,9 +487,9 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
             }
           // F24: marcador de lista também gera texto (list-style com string, ::marker content);
           // todo list-item da landing tem list-style none e nada em ::marker
-          for (const el of document.querySelectorAll("body *")) {
+          for (const el of document.querySelectorAll("html, body, body *")) {
             const cs = getComputedStyle(el);
-            if (cs.display !== "list-item") continue;
+            if (!/\blist-item\b/.test(cs.display)) continue;
             const m = getComputedStyle(el, "::marker").content;
             if (
               cs.listStyleType !== "none" ||
