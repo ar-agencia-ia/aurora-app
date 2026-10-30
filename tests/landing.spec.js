@@ -88,6 +88,49 @@ test('composição da landing', async ({ page }) => {
   }
 });
 
+test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canvas', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(site.url, { waitUntil: 'networkidle' });
+  const caixa = async (seletor) => {
+    const b = await page.locator(seletor).first().boundingBox();
+    expect(b, seletor).not.toBeNull();
+    return b;
+  };
+  // hero: o texto fica à esquerda do mosaico, lado a lado
+  const titulo = await caixa('#promessa h1');
+  const mosaico = await caixa('.mosaico');
+  expect(titulo.x + titulo.width, 'texto à esquerda do mosaico').toBeLessThanOrEqual(mosaico.x);
+  expect(Math.abs(titulo.y - mosaico.y), 'texto e mosaico começam na mesma faixa').toBeLessThan(mosaico.height);
+  // mosaico: 3 colunas e 2 linhas
+  const tiles = [];
+  for (const el of await page.locator('.mosaico .tile').all()) {
+    tiles.push({ nome: await el.locator('b').textContent(), ...(await el.boundingBox()) });
+  }
+  expect(tiles).toHaveLength(6);
+  const arred = (n) => Math.round(n);
+  const colunas = [...new Set(tiles.map((t) => arred(t.x)))];
+  expect(colunas, 'colunas').toHaveLength(3);
+  // ordem visual por (y, x) igual à do canvas C3: S-A-V-E-L-D
+  const visual = [...tiles].sort((a, b) => a.y - b.y || a.x - b.x);
+  const primeiraLinha = visual.slice(0, 3);
+  const segundaLinha = visual.slice(3);
+  // duas linhas: nenhum tile da 2ª começa antes do fim do menor da 1ª
+  const fimPrimeira = Math.min(...primeiraLinha.map((t) => t.y + t.height));
+  for (const t of segundaLinha) expect(t.y, `${t.nome} na 2ª linha`).toBeGreaterThanOrEqual(fimPrimeira);
+  const porColuna = (grupo) => [...grupo].sort((a, b) => a.x - b.x).map((t) => t.nome);
+  expect([...porColuna(primeiraLinha), ...porColuna(segundaLinha)]).toEqual([
+    'Silêncio', 'Afirmações', 'Visualização', 'Exercício', 'Leitura', 'Diário',
+  ]);
+  // tiles 2 e 5 (Afirmações, Leitura) deslocados para baixo em relação aos vizinhos de linha
+  const por = Object.fromEntries(tiles.map((t) => [t.nome, t]));
+  expect(por['Afirmações'].y - por['Silêncio'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
+  expect(por['Afirmações'].y - por['Visualização'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
+  expect(por['Leitura'].y - por['Exercício'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
+  expect(por['Leitura'].y - por['Diário'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
+  expect(Math.abs(por['Silêncio'].y - por['Visualização'].y), 'Silêncio e Visualização alinhados').toBeLessThan(2);
+  expect(Math.abs(por['Exercício'].y - por['Diário'].y), 'Exercício e Diário alinhados').toBeLessThan(2);
+});
+
 test('abrir o Portão mostra Entrar na lista com a URL do Forms', async ({ page }) => {
   const aberto = await iniciar({ formsUrl: FORMS_TESTE });
   try {
