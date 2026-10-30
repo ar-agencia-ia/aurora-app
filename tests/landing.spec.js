@@ -485,9 +485,24 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
               if (c !== "none" && c !== "normal")
                 achados.push(`${el.tagName.toLowerCase()}${pseudo} ${c}`);
             }
+          // F24: marcador de lista também gera texto (list-style com string, ::marker content);
+          // todo list-item da landing tem list-style none e nada em ::marker
+          for (const el of document.querySelectorAll("body *")) {
+            const cs = getComputedStyle(el);
+            if (cs.display !== "list-item") continue;
+            const m = getComputedStyle(el, "::marker").content;
+            if (
+              cs.listStyleType !== "none" ||
+              cs.listStyleImage !== "none" ||
+              (m !== "normal" && m !== "none")
+            )
+              achados.push(
+                `${el.tagName.toLowerCase()} list-style ${cs.listStyleType} ${cs.listStyleImage} ::marker ${m}`,
+              );
+          }
           return achados;
         });
-        expect(gerados, `${estado} ${largura} px: content em pseudo-elemento`).toEqual([]);
+        expect(gerados, `${estado} ${largura} px: texto gerado por pseudo-elemento ou marcador`).toEqual([]);
         await expect(
           page.locator("input, textarea, select, [placeholder]"),
           `${estado} ${largura} px`,
