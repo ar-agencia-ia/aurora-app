@@ -110,7 +110,45 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
       // ordem do DOM: Silêncio, Visualização, Leitura, Afirmações, Exercício, Diário
       expect(await page.locator('#praticas .tile span').allTextContents(), estado).toEqual(frases);
       expect(await page.locator('#passos ol > li p').allTextContents(), estado).toEqual(textosPassos);
+      // textos soltos do canvas VersaoC3.dc.html, literais (não derivados do index.html)
+      await expect(page.locator('header .marca'), estado).toHaveText('Aurora');
+      await expect(page.locator('#promessa p.lead'), estado).toHaveText(
+        'O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.',
+      );
+      await expect(page.locator('#promessa p.lead + p.suave'), estado).toHaveText(
+        'Estamos formando o grupo do teste fechado: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.',
+      );
+      await expect(page.locator('#praticas h2.sr'), estado).toHaveText('As seis práticas');
+      await expect(page.locator('.nota-mosaico'), estado).toHaveText(
+        'Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.',
+      );
+      await expect(page.locator('#titulo-passos'), estado).toHaveText('Como funciona o teste');
+      expect(await page.locator('#passos .n').allTextContents(), estado).toEqual(['1', '2', '3']);
+      const rodape = page.locator('footer p');
+      await expect(rodape.nth(0), estado).toHaveText(
+        'O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.',
+      );
+      await expect(rodape.nth(1), estado).toHaveText('O Aurora não substitui orientação médica ou psicológica.');
+      // divergência de propósito: o canvas traz o Gmail do autor e o index traz contato@ (AC 30)
+      await expect(rodape.nth(3), estado).toHaveText(/^Dúvidas ou pedido de exclusão: \S+@\S+\.$/);
+      const fechado = page.locator('#portao-fechado');
+      const bloco = page.locator('#portao-aberto');
       const banda = page.locator('#cadastro-fim');
+      if (estado === 'aberto') {
+        await expect(bloco.locator('p').nth(0)).toHaveText(
+          'Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, marque a opção de aviso de lançamento.',
+        );
+        await expect(bloco.locator('p').nth(1)).toHaveText(
+          'Só para Android. O formulário abre no Google Forms; a política de privacidade, no rodapé, diz por quanto tempo guardamos os dados e como pedir a exclusão.',
+        );
+        await expect(fechado).toBeHidden();
+        await expect(bloco).toBeVisible();
+      } else {
+        await expect(fechado).toHaveText('As inscrições ainda não abriram. Volte em breve.');
+        await expect(fechado).toBeVisible();
+        await expect(page.locator('#cadastro p').nth(1)).toHaveText(/^Dúvidas\? Escreva para \S+@\S+\.$/);
+        await expect(bloco).toBeHidden();
+      }
       if (estado === 'aberto') {
         await expect(banda).toBeVisible();
         await expect(banda.getByRole('heading', { name: 'Pronto para ajudar?' })).toBeVisible();
