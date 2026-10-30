@@ -475,6 +475,23 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
           ),
           `${estado} ${largura} px`,
         ).toHaveCount(0);
+        // F23: texto gerado por CSS não entra em innerText; nenhum pseudo-elemento pode gerar conteúdo
+        // (a landing só usa ::selection, sem content) e não há campo de entrada nem placeholder
+        const gerados = await page.evaluate(() => {
+          const achados = [];
+          for (const el of document.querySelectorAll("html, body, body *"))
+            for (const pseudo of ["::before", "::after"]) {
+              const c = getComputedStyle(el, pseudo).content;
+              if (c !== "none" && c !== "normal")
+                achados.push(`${el.tagName.toLowerCase()}${pseudo} ${c}`);
+            }
+          return achados;
+        });
+        expect(gerados, `${estado} ${largura} px: content em pseudo-elemento`).toEqual([]);
+        await expect(
+          page.locator("input, textarea, select, [placeholder]"),
+          `${estado} ${largura} px`,
+        ).toHaveCount(0);
       }
     } finally {
       alvo.fechar();

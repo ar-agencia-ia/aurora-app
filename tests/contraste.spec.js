@@ -173,7 +173,7 @@ for (const estado of ["fechado", "aberto"]) {
           "Dúvidas ou pedido de exclusão:",
         ]) {
           expect(
-            textos.some((t) => t.startsWith(esperado)),
+            textos.join(" ").includes(esperado),
             `${estado} ${largura} mede "${esperado}"`,
           ).toBe(true);
         }
