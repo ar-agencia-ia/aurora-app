@@ -15,6 +15,7 @@ test('sem terceiros nem cookie', async ({ page, context }) => {
 });
 
 const FORMS_TESTE = 'https://forms.example.test/aurora-teste';
+const EMAIL = 'contato@auroramanha.com.br';
 
 // Mede a landing nos dois estados do Portão: o CTA principal só existe no aberto.
 for (const estado of ['fechado', 'aberto']) {
@@ -129,8 +130,12 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
         'O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.',
       );
       await expect(rodape.nth(1), estado).toHaveText('O Aurora não substitui orientação médica ou psicológica.');
-      // divergência de propósito: o canvas traz o Gmail do autor e o index traz contato@ (AC 30)
-      await expect(rodape.nth(3), estado).toHaveText(/^Dúvidas ou pedido de exclusão: \S+@\S+\.$/);
+      // divergência de propósito: o canvas diz "serviços de terceiros" e o index cita scripts de terceiros e o GitHub Pages
+      await expect(rodape.nth(2), estado).toHaveText(
+        'Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.',
+      );
+      // divergência de propósito: o canvas traz o Gmail do autor e o index traz contato@auroramanha.com.br (AC 30)
+      await expect(rodape.nth(3), estado).toHaveText(`Dúvidas ou pedido de exclusão: ${EMAIL}.`);
       const fechado = page.locator('#portao-fechado');
       const bloco = page.locator('#portao-aberto');
       const banda = page.locator('#cadastro-fim');
@@ -146,16 +151,63 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
       } else {
         await expect(fechado).toHaveText('As inscrições ainda não abriram. Volte em breve.');
         await expect(fechado).toBeVisible();
-        await expect(page.locator('#cadastro p').nth(1)).toHaveText(/^Dúvidas\? Escreva para \S+@\S+\.$/);
+        await expect(page.locator('#cadastro p').nth(1)).toHaveText(`Dúvidas? Escreva para ${EMAIL}.`);
         await expect(bloco).toBeHidden();
       }
       if (estado === 'aberto') {
         await expect(banda).toBeVisible();
-        await expect(banda.getByRole('heading', { name: 'Pronto para ajudar?' })).toBeVisible();
+        await expect(banda.getByRole('heading', { level: 2, name: 'Pronto para ajudar?', exact: true })).toBeVisible();
       } else {
         await expect(banda).toBeHidden();
         await expect(page.getByText('Pronto para ajudar?')).toBeHidden();
       }
+    } finally {
+      alvo.fechar();
+    }
+  }
+});
+
+test('atributos e estrutura do canvas e e-mail de contato nos dois estados', async ({ page }) => {
+  const tiles = {
+    Silêncio: 'silencio', Visualização: 'visualizacao', Leitura: 'leitura',
+    Afirmações: 'afirmacoes', Exercício: 'exercicio', Diário: 'diario',
+  };
+  for (const estado of ['fechado', 'aberto']) {
+    const alvo = await iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+    try {
+      await page.goto(alvo.url, { waitUntil: 'networkidle' });
+      // e-mail de contato: texto e href literais no bloco fechado e no rodapé (AC 30)
+      for (const email of [page.locator('#cadastro a[href^="mailto:"]'), page.locator('footer a[href^="mailto:"]')]) {
+        await expect(email, estado).toHaveCount(1);
+        await expect(email, estado).toHaveText(EMAIL);
+        await expect(email, estado).toHaveAttribute('href', `mailto:${EMAIL}`);
+      }
+      // o canvas fixa alt="" (decorativas) nas 7 imagens, lang pt-BR e aria-hidden nos numerais
+      await expect(page.locator('img'), estado).toHaveCount(7);
+      for (const img of await page.locator('img').all()) await expect(img, estado).toHaveAttribute('alt', '');
+      await expect(page.locator('html'), estado).toHaveAttribute('lang', 'pt-BR');
+      await expect(page.locator('#passos .n'), estado).toHaveCount(3);
+      for (const n of await page.locator('#passos .n').all()) await expect(n, estado).toHaveAttribute('aria-hidden', 'true');
+      // h2 dos passos e <strong> do teste fechado
+      await expect(page.getByRole('heading', { level: 2, name: 'Como funciona o teste', exact: true }), estado).toHaveCount(1);
+      await expect(page.locator('#promessa p.suave strong'), estado).toHaveText('teste fechado');
+      // a imagem certa em cada tile
+      for (const [nome, arquivo] of Object.entries(tiles)) {
+        const tile = page.locator('#praticas .tile').filter({ has: page.locator('b', { hasText: new RegExp(`^${nome}$`) }) });
+        await expect(tile.locator('img'), `${estado} ${nome}`).toHaveAttribute('src', `assets/${arquivo}.webp`);
+      }
+      // o link da política é o primeiro filho do rodapé e tem nome acessível exato
+      const primeiro = page.locator('footer > :first-child');
+      await expect(primeiro, estado).toHaveText('Política de privacidade');
+      expect(await primeiro.evaluate((el) => el.tagName), estado).toBe('A');
+      await expect(page.getByRole('link', { name: 'Política de privacidade', exact: true }), estado).toHaveCount(1);
+      // só do index.html (O6): aria-labelledby das regiões e o <noscript> do bloco fechado
+      await expect(page.locator('#promessa'), estado).toHaveAttribute('aria-labelledby', 'titulo');
+      await expect(page.locator('#passos'), estado).toHaveAttribute('aria-labelledby', 'titulo-passos');
+      // com JavaScript ativo o navegador trata o <noscript> como texto cru, então lê-se o textContent
+      expect(await page.locator('#cadastro noscript').evaluate((el) => el.textContent), estado).toContain(
+        'Se as inscrições já tiverem aberto, o botão de entrada só aparece com o JavaScript ativo.',
+      );
     } finally {
       alvo.fechar();
     }
@@ -234,7 +286,7 @@ test('abrir o Portão mostra Entrar na lista com a URL do Forms', async ({ page 
 
 test('rodapé aponta para a política no próprio domínio, igual à fonte e sem terceiros', async ({ page }) => {
   await page.goto(site.url, { waitUntil: 'networkidle' });
-  const link = page.locator('footer').getByRole('link', { name: 'Política de privacidade' });
+  const link = page.locator('footer').getByRole('link', { name: 'Política de privacidade', exact: true });
   await expect(link).toHaveAttribute('href', '/privacidade/');
 
   const origens = new Set();
