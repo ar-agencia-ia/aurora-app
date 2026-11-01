@@ -166,7 +166,7 @@ for (const estado of ["fechado", "aberto"]) {
           "Aurora",
           "Teste fechado no Android",
           "Cuide de você",
-          "Silêncio",
+          "Meditação",
           "Diário",
           "Entre na lista.",
           "Política de privacidade",

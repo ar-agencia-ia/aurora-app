@@ -69,7 +69,7 @@ test('composição da landing', async ({ page }) => {
     await page.goto(aberto.url, { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cuide de você antes que o dia comece.');
     const praticas = await page.locator('#praticas .tile b').allTextContents();
-    expect(praticas).toEqual(['Silêncio', 'Visualização', 'Leitura', 'Afirmações', 'Exercício', 'Diário']);
+    expect(praticas).toEqual(['Meditação', 'Visualização', 'Leitura', 'Afirmações', 'Exercício', 'Diário']);
     const passos = await page.locator('#passos ol > li strong').allTextContents();
     expect(passos).toEqual([
       'Entre na lista.',
@@ -108,7 +108,7 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
     try {
       await page.goto(alvo.url, { waitUntil: 'networkidle' });
       await expect(page.locator('header .selo'), estado).toHaveText('Teste fechado no Android');
-      // ordem do DOM: Silêncio, Visualização, Leitura, Afirmações, Exercício, Diário
+      // ordem do DOM: Meditação, Visualização, Leitura, Afirmações, Exercício, Diário
       expect(await page.locator('#praticas .tile span').allTextContents(), estado).toEqual(frases);
       expect(await page.locator('#passos ol > li p').allTextContents(), estado).toEqual(textosPassos);
       // textos soltos do canvas VersaoC3.dc.html, literais (não derivados do index.html)
@@ -169,7 +169,7 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
 
 test('atributos e estrutura do canvas e e-mail de contato nos dois estados', async ({ page }) => {
   const tiles = {
-    Silêncio: 'silencio', Visualização: 'visualizacao', Leitura: 'leitura',
+    Meditação: 'silencio', Visualização: 'visualizacao', Leitura: 'leitura',
     Afirmações: 'afirmacoes', Exercício: 'exercicio', Diário: 'diario',
   };
   for (const estado of ['fechado', 'aberto']) {
@@ -332,15 +332,15 @@ test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canv
   for (const t of segundaLinha) expect(t.y, `${t.nome} na 2ª linha`).toBeGreaterThanOrEqual(fimPrimeira);
   const porColuna = (grupo) => [...grupo].sort((a, b) => a.x - b.x).map((t) => t.nome);
   expect([...porColuna(primeiraLinha), ...porColuna(segundaLinha)]).toEqual([
-    'Silêncio', 'Afirmações', 'Visualização', 'Exercício', 'Leitura', 'Diário',
+    'Meditação', 'Afirmações', 'Visualização', 'Exercício', 'Leitura', 'Diário',
   ]);
   // tiles 2 e 5 (Afirmações, Leitura) deslocados para baixo em relação aos vizinhos de linha
   const por = Object.fromEntries(tiles.map((t) => [t.nome, t]));
-  expect(por['Afirmações'].y - por['Silêncio'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
+  expect(por['Afirmações'].y - por['Meditação'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
   expect(por['Afirmações'].y - por['Visualização'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
   expect(por['Leitura'].y - por['Exercício'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
   expect(por['Leitura'].y - por['Diário'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
-  expect(Math.abs(por['Silêncio'].y - por['Visualização'].y), 'Silêncio e Visualização alinhados').toBeLessThan(2);
+  expect(Math.abs(por['Meditação'].y - por['Visualização'].y), 'Meditação e Visualização alinhados').toBeLessThan(2);
   expect(Math.abs(por['Exercício'].y - por['Diário'].y), 'Exercício e Diário alinhados').toBeLessThan(2);
   // passos: 3 colunas na mesma linha
   const passos = [];
@@ -401,7 +401,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
   ];
   const meio = [
     "As seis práticas",
-    "Silêncio",
+    "Meditação",
     "Abra um espaço de calma antes da correria.",
     "Visualização",
     "Imagine com clareza como você quer viver o seu dia.",
