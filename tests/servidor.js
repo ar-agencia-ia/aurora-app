@@ -5,10 +5,11 @@ const path = require('path');
 const RAIZ = path.resolve(__dirname, '..');
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
 const PORTAO = /var FORMS_URL = "[^"]*";/;
+const PIXEL = /var PIXEL_ID = "[^"]*";/;
 
-// Serve a landing do disco. Troca o único valor do Portão em memória: `formsUrl` abre, sem ele fecha.
+// Serve a landing do disco. Troca o valor do Portão em memória (`formsUrl` abre, sem ele fecha) e o `PIXEL_ID` (`pixelId` liga o Pixel, sem ele fica desligado).
 // Assim os testes dos dois estados valem seja qual for o valor commitado em index.html.
-function iniciar({ formsUrl } = {}) {
+function iniciar({ formsUrl, pixelId } = {}) {
   const servidor = http.createServer((req, res) => {
     const rota = req.url.split('?')[0];
     const arquivo = path.join(RAIZ, rota.endsWith('/') ? rota + 'index.html' : rota);
@@ -20,7 +21,12 @@ function iniciar({ formsUrl } = {}) {
     if (arquivo === path.join(RAIZ, 'index.html')) {
       const html = corpo.toString('utf8');
       if (!PORTAO.test(html)) throw new Error('valor do Portão não encontrado em index.html');
-      corpo = Buffer.from(html.replace(PORTAO, () => `var FORMS_URL = ${JSON.stringify(formsUrl || '')};`));
+      if (!PIXEL.test(html)) throw new Error('PIXEL_ID não encontrado em index.html');
+      corpo = Buffer.from(
+        html
+          .replace(PORTAO, () => `var FORMS_URL = ${JSON.stringify(formsUrl || '')};`)
+          .replace(PIXEL, () => `var PIXEL_ID = ${JSON.stringify(pixelId || '')};`),
+      );
     }
     res.writeHead(200, { 'Content-Type': TIPOS[path.extname(arquivo)] || 'application/octet-stream' });
     res.end(corpo);

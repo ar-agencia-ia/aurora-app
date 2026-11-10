@@ -95,6 +95,13 @@ strong{font-weight:500}
 .chamada .miolo{padding-top:64px;padding-bottom:64px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xl) 48px}
 .chamada h2{margin:0}
 [hidden]{display:none!important}
+.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:var(--space-lg)}
+.medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-md) var(--space-lg)}
+.medicao p{margin:0;flex:1 1 20rem;font-size:.875rem}
+.medicao .acoes{display:flex;gap:var(--space-sm)}
+.medicao button,.recusar{min-height:48px;min-width:48px;padding:0 var(--space-xl);border:2px solid var(--primary-press);border-radius:24px;background:transparent;color:var(--primary-press);font:inherit;font-weight:500;cursor:pointer}
+.medicao button:focus-visible,.recusar:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.recusar{display:block;margin-top:var(--space-sm);font-size:.875rem}
 footer{padding-top:var(--space-section);padding-bottom:var(--space-section)}
 footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
 @media (min-width:600px){h1{font-size:clamp(2.5rem,1.2rem + 3.6vw,3.75rem)}}
@@ -181,9 +188,20 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
   <a class="link" href="/privacidade/">Política de privacidade</a>
   <p>O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.</p>
   <p>O Aurora não substitui orientação médica ou psicológica.</p>
-  <p>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.</p>
+  <p data-rodape-pixel>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.</p>
+  <button type="button" class="recusar" data-recusar data-com-pixel hidden>Recusar medição</button>
   <p>Dúvidas ou pedido de exclusão: <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
 </footer>
+
+<aside id="medicao" class="medicao" aria-label="Aviso de medição" hidden>
+  <div class="miolo">
+    <p>Usamos o Pixel da Meta para medir os anúncios que trazem você até esta página. Ele grava o cookie _fbp e envia à Meta a sua visita e o clique em entrar. <a class="link" href="/privacidade/">Saiba mais</a></p>
+    <div class="acoes">
+      <button type="button" data-recusar>Recusar</button>
+      <button type="button" data-ciente>Entendi</button>
+    </div>
+  </div>
+</aside>
 
 <script>
 (function () {
@@ -192,6 +210,56 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
   document.querySelectorAll("[data-entrar]").forEach(function (a) { a.setAttribute("href", FORMS_URL); });
   document.querySelectorAll("[data-fechado]").forEach(function (el) { el.hidden = true; });
   document.querySelectorAll("[data-aberto]").forEach(function (el) { el.hidden = false; });
+})();
+</script>
+<script>
+(function () {
+  var PIXEL_ID = "1176967205007564";
+  if (!PIXEL_ID) return;
+  var CHAVE = "aurora-medicao";
+  var estado = null;
+  try { estado = localStorage.getItem(CHAVE); } catch (e) {}
+  function gravar(v) { try { localStorage.setItem(CHAVE, v); } catch (e) {} }
+  function mostrar(sel, ligado) { document.querySelectorAll(sel).forEach(function (el) { el.hidden = !ligado; }); }
+  var rodape = document.querySelector("[data-rodape-pixel]");
+  var textoSemPixel = rodape.textContent;
+  var textoComPixel = "Esta página usa o Pixel da Meta, que grava o cookie _fbp, para medir os anúncios que trazem você até aqui. Você pode recusar a medição. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.";
+  if (estado === "recusada") return;
+  rodape.textContent = textoComPixel;
+  mostrar("[data-com-pixel]", true);
+  !function (f, b, e, v, n, t, s) {
+    if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = [];
+    t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+  }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+  fbq("init", PIXEL_ID);
+  fbq("track", "PageView");
+  document.querySelectorAll("[data-entrar]").forEach(function (a) {
+    a.addEventListener("click", function () { fbq("trackCustom", "ClicouEntrar"); });
+  });
+  var aviso = document.getElementById("medicao");
+  if (estado !== "ciente") aviso.hidden = false;
+  function apagarCookies() {
+    var partes = location.hostname.split(".");
+    for (var i = 0; i < partes.length - 1; i++) {
+      var dominio = partes.slice(i).join(".");
+      ["_fbp", "_fbc"].forEach(function (c) {
+        document.cookie = c + "=; Max-Age=0; path=/; domain=" + dominio;
+        document.cookie = c + "=; Max-Age=0; path=/";
+      });
+    }
+  }
+  document.querySelectorAll("[data-recusar]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      fbq("consent", "revoke");
+      apagarCookies();
+      gravar("recusada");
+      aviso.hidden = true;
+      mostrar("[data-com-pixel]", false);
+      rodape.textContent = textoSemPixel;
+    });
+  });
+  document.querySelector("[data-ciente]").addEventListener("click", function () { gravar("ciente"); aviso.hidden = true; });
 })();
 </script>
 </body>
