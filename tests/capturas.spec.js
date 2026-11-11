@@ -13,7 +13,7 @@ const portoes = [
   { nome: "fechado", opcoes: {} },
   {
     nome: "aberto",
-    opcoes: { formsUrl: "https://forms.example.test/aurora-teste" },
+    opcoes: { chave: "chave-de-teste-web3forms" },
   },
 ];
 

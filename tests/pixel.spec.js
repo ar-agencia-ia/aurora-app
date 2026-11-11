@@ -4,7 +4,7 @@ const path = require("path");
 const { iniciar, RAIZ } = require("./servidor");
 
 const ID = "111222333444555";
-const FORMS_TESTE = "https://forms.example.test/aurora-teste";
+const CHAVE_TESTE = "chave-de-teste-web3forms";
 const META = "**/connect.facebook.net/**";
 
 // fbevents.js falso: o snippet padrão enfileira as chamadas em fbq.queue; nada chega ao Pixel real da campanha.
@@ -12,9 +12,9 @@ const FBEVENTS_FALSO = "window.__fbeventsCarregado = true;";
 
 async function abrir(
   page,
-  { pixelId = ID, formsUrl = FORMS_TESTE, antes } = {},
+  { pixelId = ID, chave = CHAVE_TESTE, antes } = {},
 ) {
-  const alvo = await iniciar({ pixelId, formsUrl });
+  const alvo = await iniciar({ pixelId, chave });
   const pedidosMeta = [];
   await page.route(META, (rota) => {
     pedidosMeta.push(rota.request().url());
@@ -37,7 +37,7 @@ test("ID vazio: sem terceiros, sem cookie, sem aviso", async ({
   page,
   context,
 }) => {
-  const alvo = await iniciar({ pixelId: "", formsUrl: FORMS_TESTE });
+  const alvo = await iniciar({ pixelId: "", chave: CHAVE_TESTE });
   try {
     const origens = new Set();
     page.on("request", (r) => origens.add(new URL(r.url()).origin));
@@ -66,46 +66,28 @@ test("Pixel: init e PageView com o ID, sem recusa", async ({ page }) => {
   }
 });
 
-test("Pixel: clique registra ClicouEntrar e o href segue o FORMS_URL", async ({
+test("Pixel: clique em Entrar na lista registra ClicouEntrar", async ({
   page,
 }) => {
   const { alvo } = await abrir(page);
   try {
     const botoes = page.locator("[data-entrar]");
-    await expect(botoes).toHaveCount(2);
-    for (let i = 0; i < 2; i++) {
-      await expect(botoes.nth(i)).toHaveAttribute("href", FORMS_TESTE);
-    }
-    await page.route(FORMS_TESTE, (rota) => rota.fulfill({ body: "forms" }));
-    for (let i = 0; i < 2; i++) {
-      await page.goto(alvo.url, { waitUntil: "networkidle" });
-      // listener registrado depois do do Pixel: o Pixel roda primeiro e só então a navegação é barrada
-      await page
-        .locator("[data-entrar]")
-        .nth(i)
-        .evaluate((a) =>
-          a.addEventListener("click", (e) => e.preventDefault()),
-        );
-      // sem force: o clique só vale se o botão estiver livre (o aviso fixo não pode cobrir o CTA)
-      await page.locator("[data-entrar]").nth(i).click();
-      expect(await chamadas(page)).toContainEqual([
-        "trackCustom",
-        "ClicouEntrar",
-      ]);
-    }
+    await expect(botoes).toHaveCount(1);
+    // sem force: o clique só vale se o botão estiver livre (o aviso fixo não pode cobrir o CTA)
+    await botoes.first().click();
+    expect(await chamadas(page)).toContainEqual(["trackCustom", "ClicouEntrar"]);
   } finally {
     alvo.fechar();
   }
 });
 
-test("Pixel: sem Lead nem noscript", async ({ page }) => {
+test("Pixel: sem Lead nem noscript ao abrir a página", async ({ page }) => {
   const { alvo } = await abrir(page);
   try {
     const fila = await chamadas(page);
     expect(fila.filter((c) => c.includes("Lead"))).toEqual([]);
     const html = fs.readFileSync(path.join(RAIZ, "index.html"), "utf8");
     expect(html).not.toMatch(/facebook\.com\/tr/);
-    expect(html).not.toMatch(/['"]Lead['"]/);
     expect(await page.locator("noscript img").count()).toBe(0);
   } finally {
     alvo.fechar();
@@ -221,7 +203,7 @@ test("rodapé declara o Pixel com ID e mantém o texto antigo sem ID", async ({
   } finally {
     com.alvo.fechar();
   }
-  const sem = await iniciar({ pixelId: "", formsUrl: FORMS_TESTE });
+  const sem = await iniciar({ pixelId: "", chave: CHAVE_TESTE });
   try {
     await page.goto(sem.url, { waitUntil: "networkidle" });
     await expect(page.locator("footer")).toContainText(
