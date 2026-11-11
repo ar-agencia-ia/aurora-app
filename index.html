@@ -85,15 +85,26 @@ strong{font-weight:500}
 .status p:last-of-type{margin-bottom:0}
 .fechado{font-weight:500;font-size:1.125rem}
 .entrar-bloco{max-width:32.5rem}
-.cta{display:inline-flex;align-items:center;justify-content:center;min-height:56px;min-width:48px;padding:0 40px;border:2px solid transparent;border-radius:28px;background:var(--primary);color:var(--on-primary);font-weight:500;font-size:1.0625rem;letter-spacing:.15px;text-decoration:none}
+.cta{font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:56px;min-width:48px;padding:0 40px;border:2px solid transparent;border-radius:28px;background:var(--primary);color:var(--on-primary);font-weight:500;font-size:1.0625rem;letter-spacing:.15px;text-decoration:none}
 .cta:hover{background:var(--primary-press)}
 .cta:active{background:var(--primary-press);opacity:.92}
-.cta:focus-visible,.link:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.cta:disabled{opacity:.7;cursor:progress}
+.cta:focus-visible,.link:focus-visible,.form input:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .link{display:inline-flex;align-items:center;min-height:48px;color:var(--primary-press);font-weight:500;text-decoration:underline;text-underline-offset:3px}
 .link:hover,.link:active{color:var(--primary)}
-.chamada{background:var(--chip)}
-.chamada .miolo{padding-top:64px;padding-bottom:64px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xl) 48px}
-.chamada h2{margin:0}
+.form{display:flex;flex-direction:column;gap:var(--space-md);background:var(--card);border-radius:16px;padding:var(--space-xl)}
+.form .rotulo{font-weight:500}
+.form input[type=email]{min-height:48px;width:100%;border:1px solid var(--outline);border-radius:8px;padding:0 var(--space-md);background:#fff;color:var(--ink);font:inherit;letter-spacing:inherit}
+.form input[aria-invalid=true]{border:2px solid var(--ink)}
+.form .opcao{display:flex;gap:var(--space-md);align-items:flex-start;min-height:48px;line-height:1.4}
+.form .opcao input{width:24px;height:24px;margin:0;flex:none;accent-color:var(--primary)}
+.form .opcao.suave{color:var(--ink-soft)}
+.form .cta{width:100%}
+.form .apoio{margin:0}
+.erro{margin:0;font-size:.875rem;font-weight:500;color:var(--ink)}
+.erro:empty{display:none}
+#cadastro-ok{max-width:32.5rem;background:var(--chip);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl)}
+#cadastro-ok p:last-child{margin-bottom:0}
 [hidden]{display:none!important}
 .medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:var(--space-lg)}
 .medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-md) var(--space-lg)}
@@ -133,16 +144,31 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
         <p class="lead">O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.</p>
         <p class="suave">Estamos formando o grupo do <strong>teste fechado</strong>: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.</p>
 
-        <!-- Portão do teste fechado: com FORMS_URL vazio a landing fica fechada. Para abrir, cole a URL do formulário entre as aspas de FORMS_URL, no script ao fim da página. -->
+        <!-- Portão do teste fechado: com WEB3FORMS_KEY vazio a landing fica fechada. Para abrir, cole a chave de acesso (pública) do Web3Forms entre as aspas de WEB3FORMS_KEY, no script ao fim da página. -->
         <div id="cadastro" class="status" data-fechado>
           <p id="portao-fechado" class="fechado">As inscrições ainda não abriram. Volte em breve.</p>
           <p>Dúvidas? Escreva para <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
-          <noscript><p>Se as inscrições já tiverem aberto, o botão de entrada só aparece com o JavaScript ativo.</p></noscript>
+          <noscript><p>Se as inscrições já tiverem aberto, o formulário só aparece com o JavaScript ativo.</p></noscript>
         </div>
         <div id="portao-aberto" class="entrar-bloco" data-aberto hidden>
-          <p class="suave">Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, marque a opção de aviso de lançamento.</p>
-          <a id="entrar" class="cta" data-entrar href="#cadastro-fim" rel="noopener">Entrar na lista</a>
-          <p class="apoio" style="margin-top:var(--space-lg)">Só para Android. O formulário abre no Google Forms; a política de privacidade, no rodapé, diz por quanto tempo guardamos os dados e como pedir a exclusão.</p>
+          <form id="form-cadastro" class="form" novalidate>
+            <label class="rotulo" for="gmail">Seu Gmail</label>
+            <input id="gmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nome@gmail.com" aria-required="true" aria-describedby="erro-email">
+            <p id="erro-email" class="erro" aria-live="polite"></p>
+            <label class="opcao"><input type="checkbox" name="android" aria-required="true" aria-describedby="erro-android"><span>Uso um celular Android</span></label>
+            <p id="erro-android" class="erro" aria-live="polite"></p>
+            <label class="opcao"><input type="checkbox" name="aceite" aria-required="true" aria-describedby="erro-aceite"><span>Aceito participar do teste fechado por no mínimo 14 dias e que o Aurora use o meu Gmail só para esse convite.</span></label>
+            <p id="erro-aceite" class="erro" aria-live="polite"></p>
+            <label class="opcao suave"><input type="checkbox" name="aviso"><span>Opcional: quero ser avisado quando o app for lançado.</span></label>
+            <div class="sr" aria-hidden="true"><input type="text" name="botcheck" tabindex="-1" autocomplete="off"></div>
+            <button id="entrar" class="cta" data-entrar type="submit">Entrar na lista</button>
+            <p id="erro-envio" class="erro" aria-live="polite"></p>
+            <p class="apoio">Só para Android. <a class="link" href="/privacidade/">Política de privacidade</a>: por quanto tempo guardamos o Gmail e como pedir a exclusão.</p>
+          </form>
+          <div id="cadastro-ok" role="status" tabindex="-1" hidden>
+            <p class="fechado">Você está na lista.</p>
+            <p>Vamos mandar o convite por e-mail para o Gmail que você informou.</p>
+          </div>
         </div>
       </div>
 
@@ -169,26 +195,20 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
     <div class="miolo">
       <h2 id="titulo-passos">Como funciona o teste</h2>
       <ol class="passos" role="list">
-        <li><span class="n" aria-hidden="true">1</span><strong>Entre na lista.</strong><p>Você entra com a sua conta Google e confirma que usa Android.</p></li>
-        <li><span class="n" aria-hidden="true">2</span><strong>Receba o convite.</strong><p>Mandamos por e-mail o link para instalar o app pela Google Play.</p></li>
+        <li><span class="n" aria-hidden="true">1</span><strong>Entre na lista.</strong><p>Você deixa o seu Gmail e confirma que usa Android.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><strong>Receba o convite por e-mail.</strong><p>Mandamos o link para instalar o app pela Google Play.</p></li>
         <li><span class="n" aria-hidden="true">3</span><strong>Use o app e dê feedback por no mínimo 14 dias.</strong><p>Use a rotina no seu dia a dia e envie o seu retorno durante todo o período do teste.</p></li>
       </ol>
     </div>
   </section>
 
-  <section id="cadastro-fim" class="chamada" data-aberto hidden>
-    <div class="miolo">
-      <h2>Pronto para ajudar?</h2>
-      <a class="cta" data-entrar href="#cadastro-fim" rel="noopener">Entrar na lista</a>
-    </div>
-  </section>
 </main>
 
 <footer class="miolo">
   <a class="link" href="/privacidade/">Política de privacidade</a>
   <p>O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.</p>
   <p>O Aurora não substitui orientação médica ou psicológica.</p>
-  <p data-rodape-pixel>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.</p>
+  <p data-rodape-pixel>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.</p>
   <button type="button" class="recusar" data-recusar data-com-pixel hidden>Recusar medição</button>
   <p>Dúvidas ou pedido de exclusão: <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
 </footer>
@@ -205,11 +225,72 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
 
 <script>
 (function () {
-  var FORMS_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeyOjpFaCKAo4Tze6rEW1JiQrP_u21FrlNmNtiabkxp2OLERg/viewform";
-  if (!FORMS_URL) return;
-  document.querySelectorAll("[data-entrar]").forEach(function (a) { a.setAttribute("href", FORMS_URL); });
+  var WEB3FORMS_KEY = "";
+  if (!WEB3FORMS_KEY) return;
   document.querySelectorAll("[data-fechado]").forEach(function (el) { el.hidden = true; });
   document.querySelectorAll("[data-aberto]").forEach(function (el) { el.hidden = false; });
+
+  var form = document.getElementById("form-cadastro");
+  var botao = document.getElementById("entrar");
+  var textoBotao = botao.textContent;
+  var campos = { email: form.elements.email, android: form.elements.android, aceite: form.elements.aceite };
+  var enviando = false;
+
+  function mensagem(nome, texto) {
+    document.getElementById("erro-" + nome).textContent = texto;
+    if (nome === "email") campos.email.setAttribute("aria-invalid", texto ? "true" : "false");
+  }
+  function medicaoRecusada() {
+    try { return localStorage.getItem("aurora-medicao") === "recusada"; } catch (e) { return false; }
+  }
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    if (enviando || form.elements.botcheck.value) return;
+    var gmail = campos.email.value.trim();
+    mensagem("envio", "");
+    mensagem("email", !gmail ? "Informe o seu Gmail." : /^[^\s@]+@(gmail|googlemail)\.com$/i.test(gmail) ? "" : "Use um endereço do Gmail, que termina em @gmail.com.");
+    mensagem("android", campos.android.checked ? "" : "Marque que você usa um celular Android.");
+    mensagem("aceite", campos.aceite.checked ? "" : "Marque o aceite para entrar na lista.");
+    var invalido = ["email", "android", "aceite"].filter(function (n) { return document.getElementById("erro-" + n).textContent; });
+    if (invalido.length) { campos[invalido[0]].focus(); return; }
+
+    var dados = {
+      access_key: WEB3FORMS_KEY,
+      subject: "Aurora cadastro",
+      email: gmail,
+      android: "sim",
+      aceite: "sim",
+      aviso: form.elements.aviso.checked ? "sim" : "nao"
+    };
+    var url = new URLSearchParams(location.search);
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].forEach(function (k) {
+      if (url.get(k)) dados[k] = url.get(k);
+    });
+    enviando = true;
+    botao.disabled = true;
+    botao.textContent = "Enviando…";
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(dados)
+    }).then(function (r) {
+      return r.json().catch(function () { return null; }).then(function (corpo) { return r.ok && !!corpo && corpo.success === true; });
+    }, function () { return false; }).then(function (ok) {
+      enviando = false;
+      botao.disabled = false;
+      botao.textContent = textoBotao;
+      if (!ok) {
+        mensagem("envio", "Não foi possível enviar agora. Seus dados continuam aqui; tente de novo em instantes.");
+        return;
+      }
+      if (window.fbq && !medicaoRecusada()) fbq("track", "Lead");
+      form.hidden = true;
+      var confirmacao = document.getElementById("cadastro-ok");
+      confirmacao.hidden = false;
+      confirmacao.focus();
+    });
+  });
 })();
 </script>
 <script>
@@ -223,7 +304,7 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
   function mostrar(sel, ligado) { document.querySelectorAll(sel).forEach(function (el) { el.hidden = !ligado; }); }
   var rodape = document.querySelector("[data-rodape-pixel]");
   var textoSemPixel = rodape.textContent;
-  var textoComPixel = "Esta página usa o Pixel da Meta, que grava o cookie _fbp, para medir os anúncios que trazem você até aqui. Você pode recusar a medição. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.";
+  var textoComPixel = "Esta página usa o Pixel da Meta, que grava o cookie _fbp, para medir os anúncios que trazem você até aqui. Você pode recusar a medição. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.";
   if (estado === "recusada") return;
   rodape.textContent = textoComPixel;
   mostrar("[data-com-pixel]", true);
