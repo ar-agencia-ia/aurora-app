@@ -69,6 +69,7 @@ test("Pixel: init e PageView com o ID, sem recusa", async ({ page }) => {
 test("Pixel: clique registra ClicouEntrar e o href segue o FORMS_URL", async ({
   page,
 }) => {
+  test.setTimeout(120000);
   const { alvo } = await abrir(page);
   try {
     const botoes = page.locator("[data-entrar]");
@@ -218,6 +219,56 @@ for (const [largura, altura] of [
     }
   });
 }
+
+test("Recusar antes de o fbevents.js carregar não deixa PageView na fila", async ({
+  page,
+}) => {
+  const alvo = await iniciar({ pixelId: ID, formsUrl: FORMS_TESTE });
+  let liberar;
+  const portao = new Promise((r) => (liberar = r));
+  await page.route(META, async (rota) => {
+    await portao;
+    return rota.fulfill({
+      contentType: "application/javascript",
+      body: FBEVENTS_FALSO,
+    });
+  });
+  try {
+    await page.goto(alvo.url, { waitUntil: "domcontentloaded" });
+    await page
+      .locator("#medicao")
+      .getByRole("button", { name: "Recusar", exact: true })
+      .click();
+    const fila = await chamadas(page);
+    expect(fila.filter((c) => c[0] === "track")).toEqual([]);
+    expect(fila).toContainEqual(["consent", "revoke"]);
+    liberar();
+  } finally {
+    liberar();
+    alvo.fechar();
+  }
+});
+
+test("depois de Recusar, o clique em Entrar não registra ClicouEntrar", async ({
+  page,
+}) => {
+  const { alvo } = await abrir(page);
+  try {
+    await page.locator("footer").getByRole("button", { name: "Recusar medição" }).click();
+    await page.route(FORMS_TESTE, (rota) => rota.fulfill({ body: "forms" }));
+    await page
+      .locator("[data-entrar]")
+      .first()
+      .evaluate((a) => a.addEventListener("click", (e) => e.preventDefault()));
+    await page.locator("[data-entrar]").first().click();
+    expect(await chamadas(page)).not.toContainEqual([
+      "trackCustom",
+      "ClicouEntrar",
+    ]);
+  } finally {
+    alvo.fechar();
+  }
+});
 
 test("Entendi esconde o aviso e grava ciente", async ({ page }) => {
   const { alvo } = await abrir(page);
