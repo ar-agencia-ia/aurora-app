@@ -300,13 +300,18 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
     enviando = true;
     botao.setAttribute("aria-disabled", "true");
     botao.textContent = "Enviando…";
+    // sem resposta em 15 s o envio conta como falha: o botão volta, os dados ficam e não há Lead
+    var cancelar = new AbortController();
+    var limite = setTimeout(function () { cancelar.abort(); }, 15000);
     fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(dados)
+      body: JSON.stringify(dados),
+      signal: cancelar.signal
     }).then(function (r) {
       return r.json().catch(function () { return null; }).then(function (corpo) { return r.ok && !!corpo && corpo.success === true; });
     }, function () { return false; }).then(function (ok) {
+      clearTimeout(limite);
       enviando = false;
       botao.removeAttribute("aria-disabled");
       botao.textContent = textoBotao;

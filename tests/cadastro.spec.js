@@ -242,6 +242,27 @@ test("sucesso confirma e dispara Lead", async ({ page }) => {
   }
 });
 
+test("sem resposta em 15 s o envio falha, mantém dados e não dispara Lead", async ({
+  page,
+}) => {
+  await page.clock.install();
+  const { alvo, estado } = await abrir(page, { pixel: true });
+  try {
+    estado.esperar = new Promise(() => {});
+    await preencher(page);
+    await entrar(page).click();
+    await expect(page.locator("#entrar")).toHaveAttribute("aria-disabled", "true");
+    await page.clock.fastForward(15500);
+    await expect(page.locator("#erro-envio")).toContainText("Não foi possível enviar");
+    await expect(page.locator("#entrar")).not.toHaveAttribute("aria-disabled", "true");
+    await expect(gmail(page)).toHaveValue("pessoa@gmail.com");
+    await expect(page.locator("#cadastro-ok")).toBeHidden();
+    expect(await leads(page)).toHaveLength(0);
+  } finally {
+    alvo.fechar();
+  }
+});
+
 test("sem Lead apos Recusar mesmo com localStorage bloqueado", async ({
   page,
 }) => {
