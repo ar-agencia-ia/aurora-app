@@ -160,7 +160,7 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
             <label class="opcao"><input type="checkbox" name="aceite" aria-required="true" aria-describedby="erro-aceite"><span>Aceito participar do teste fechado por no mínimo 14 dias e que o Aurora use o meu Gmail só para esse convite.</span></label>
             <p id="erro-aceite" class="erro" aria-live="polite"></p>
             <label class="opcao suave"><input type="checkbox" name="aviso"><span>Opcional: quero ser avisado quando o app for lançado.</span></label>
-            <div class="sr" aria-hidden="true"><input type="text" name="botcheck" tabindex="-1" autocomplete="off"></div>
+            <div class="sr" aria-hidden="true"><input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off"></div>
             <button id="entrar" class="cta" data-entrar type="submit">Entrar na lista</button>
             <p id="erro-envio" class="erro" aria-live="polite"></p>
             <p class="apoio">Só para Android. <a class="link" href="/privacidade/">Política de privacidade</a>: por quanto tempo guardamos o Gmail e como pedir a exclusão.</p>
@@ -244,9 +244,16 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
     try { return localStorage.getItem("aurora-medicao") === "recusada"; } catch (e) { return false; }
   }
 
+  function confirmar() {
+    form.hidden = true;
+    var confirmacao = document.getElementById("cadastro-ok");
+    confirmacao.hidden = false;
+    confirmacao.focus();
+  }
+
   form.addEventListener("submit", function (ev) {
     ev.preventDefault();
-    if (enviando || form.elements.botcheck.value) return;
+    if (enviando) return;
     var gmail = campos.email.value.trim();
     mensagem("envio", "");
     mensagem("email", !gmail ? "Informe o seu Gmail." : /^[^\s@]+@(gmail|googlemail)\.com$/i.test(gmail) ? "" : "Use um endereço do Gmail, que termina em @gmail.com.");
@@ -254,6 +261,9 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
     mensagem("aceite", campos.aceite.checked ? "" : "Marque o aceite para entrar na lista.");
     var invalido = ["email", "android", "aceite"].filter(function (n) { return document.getElementById("erro-" + n).textContent; });
     if (invalido.length) { campos[invalido[0]].focus(); return; }
+
+    // Honeypot marcado: finge sucesso (sem rede e sem Lead), para quem tem o gerenciador de senhas preenchendo o campo oculto não ficar sem resposta.
+    if (form.elements.botcheck.checked) { confirmar(); return; }
 
     var dados = {
       access_key: WEB3FORMS_KEY,
@@ -285,10 +295,7 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
         return;
       }
       if (window.fbq && !medicaoRecusada()) fbq("track", "Lead");
-      form.hidden = true;
-      var confirmacao = document.getElementById("cadastro-ok");
-      confirmacao.hidden = false;
-      confirmacao.focus();
+      confirmar();
     });
   });
 })();
@@ -315,6 +322,7 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
   }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
   fbq("init", PIXEL_ID);
   fbq("track", "PageView");
+  // ClicouEntrar dispara no clique do botão de envio, inclusive em tentativas inválidas (não conta cadastro; o cadastro é o Lead).
   document.querySelectorAll("[data-entrar]").forEach(function (a) {
     a.addEventListener("click", function () { fbq("trackCustom", "ClicouEntrar"); });
   });

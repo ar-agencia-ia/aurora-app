@@ -339,7 +339,7 @@ test("falha do servico mantem dados", async ({ page }) => {
 });
 
 test("botcheck", async ({ page }) => {
-  const { alvo, estado } = await abrir(page);
+  const { alvo, estado } = await abrir(page, { pixel: true });
   try {
     // campo oculto para pessoas: fora do foco por teclado e escondido dos leitores de tela
     const campo = page.locator('#form-cadastro input[name="botcheck"]');
@@ -354,13 +354,13 @@ test("botcheck", async ({ page }) => {
 
     await preencher(page);
     await campo.evaluate((el) => {
-      el.value = "robo";
+      el.checked = true;
     });
     await entrar(page).click();
-    await page.waitForTimeout(200);
+    // confirmação falsa: o robô (ou o gerenciador de senhas) vê sucesso, mas nada vai à rede
+    await expect(page.locator("#cadastro-ok")).toBeVisible();
     expect(estado.pedidos, "envio ignorado sem chamar a rede").toHaveLength(0);
-    await expect(page.locator("#cadastro-ok")).toBeHidden();
-    await expect(page.locator("#form-cadastro")).toBeVisible();
+    expect(await leads(page), "sem Lead").toHaveLength(0);
   } finally {
     alvo.fechar();
   }
