@@ -250,6 +250,7 @@ test("política declara o Pixel e o servidor devolve 404 para caminho inexistent
       "legítimo interesse",
       "Como recusar",
       "Recusar medição",
+      "aba privativa",
     ]) {
       expect(texto).toContain(trecho);
     }
