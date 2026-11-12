@@ -95,13 +95,15 @@ strong{font-weight:500}
 .chamada .miolo{padding-top:64px;padding-bottom:64px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xl) 48px}
 .chamada h2{margin:0}
 [hidden]{display:none!important}
-.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:var(--space-lg)}
-.medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-md) var(--space-lg)}
-.medicao p{margin:0;flex:1 1 20rem;font-size:.875rem}
-.medicao .acoes{display:flex;gap:var(--space-sm)}
+.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:8px var(--space-lg)}
+.medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:8px var(--space-lg)}
+.medicao p{margin:0;flex:1 1 20rem;font-size:.8125rem;line-height:1.3}
+.medicao .acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-sm)}
 .medicao button,.recusar{min-height:48px;min-width:48px;padding:0 var(--space-xl);border:2px solid var(--primary-press);border-radius:24px;background:transparent;color:var(--primary-press);font:inherit;font-weight:500;cursor:pointer}
+.medicao button{padding:0 16px}
 .medicao button:focus-visible,.recusar:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .recusar{display:block;margin-top:var(--space-sm);font-size:.875rem}
+@media (min-width:60rem){.medicao{left:auto;right:var(--space-lg);bottom:var(--space-lg);max-width:26rem;border:1px solid var(--outline);border-radius:16px;padding:var(--space-lg)}}
 footer{padding-top:var(--space-section);padding-bottom:var(--space-section)}
 footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
 @media (min-width:600px){h1{font-size:clamp(2.5rem,1.2rem + 3.6vw,3.75rem)}}
@@ -195,8 +197,9 @@ footer p{font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
 
 <aside id="medicao" class="medicao" aria-label="Aviso de medição" hidden>
   <div class="miolo">
-    <p>Usamos o Pixel da Meta para medir os anúncios que trazem você até esta página. Ele grava o cookie _fbp e envia à Meta a sua visita e o clique em entrar. <a class="link" href="/privacidade/">Saiba mais</a></p>
+    <p>Usamos o Pixel da Meta para medir os anúncios que trazem você até esta página. Ele grava o cookie _fbp e envia à Meta a sua visita e o clique em entrar.</p>
     <div class="acoes">
+      <a class="link" href="/privacidade/">Saiba mais</a>
       <button type="button" data-recusar>Recusar</button>
       <button type="button" data-ciente>Entendi</button>
     </div>

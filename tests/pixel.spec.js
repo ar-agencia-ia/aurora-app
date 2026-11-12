@@ -184,6 +184,41 @@ test("recusa persiste: nova visita não pede fbevents.js nem mostra o aviso", as
   }
 });
 
+for (const [largura, altura] of [
+  [1280, 720],
+  [360, 800],
+]) {
+  test(`aviso visível não cobre o CTA do topo sem rolar (${largura}x${altura})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: largura, height: altura });
+    const { alvo } = await abrir(page);
+    try {
+      await expect(page.locator("#medicao")).toBeVisible();
+      const cobertos = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-entrar]")]
+          .map((a) => {
+            const r = a.getBoundingClientRect();
+            if (r.bottom <= 0 || r.top >= innerHeight) return null;
+            const x = r.left + r.width / 2;
+            const y = r.top + r.height / 2;
+            const topo = document.elementFromPoint(x, y);
+            return a.contains(topo) ? null : topo && topo.tagName;
+          })
+          .filter(Boolean),
+      );
+      expect(cobertos).toEqual([]);
+      const emViewport = await page
+        .locator("[data-entrar]")
+        .first()
+        .evaluate((a) => a.getBoundingClientRect().top < innerHeight);
+      expect(emViewport).toBe(true);
+    } finally {
+      alvo.fechar();
+    }
+  });
+}
+
 test("Entendi esconde o aviso e grava ciente", async ({ page }) => {
   const { alvo } = await abrir(page);
   try {
