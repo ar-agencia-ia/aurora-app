@@ -242,6 +242,32 @@ test("sucesso confirma e dispara Lead", async ({ page }) => {
   }
 });
 
+test("sem Lead apos Recusar mesmo com localStorage bloqueado", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new Error("bloqueado");
+    };
+    Storage.prototype.getItem = () => {
+      throw new Error("bloqueado");
+    };
+  });
+  const { alvo } = await abrir(page, { pixel: true });
+  try {
+    await page
+      .locator("#medicao")
+      .getByRole("button", { name: "Recusar", exact: true })
+      .click();
+    await preencher(page);
+    await entrar(page).click();
+    await expect(page.locator("#cadastro-ok")).toBeVisible();
+    expect(await leads(page)).toHaveLength(0);
+  } finally {
+    alvo.fechar();
+  }
+});
+
 test("sem Lead se medicao recusada", async ({ page }) => {
   // recusa durante a visita
   const { alvo, estado } = await abrir(page, { pixel: true });

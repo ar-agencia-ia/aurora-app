@@ -314,7 +314,7 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
         document.getElementById("erro-envio").scrollIntoView({ block: "nearest" });
         return;
       }
-      if (window.fbq && !medicaoRecusada()) fbq("track", "Lead");
+      if (window.fbq && !window.__recusouMedicao && !medicaoRecusada()) fbq("track", "Lead");
       confirmar(gmail);
     });
   });
@@ -362,6 +362,7 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   document.querySelectorAll("[data-recusar]").forEach(function (b) {
     b.addEventListener("click", function () {
       recusou = true;
+      window.__recusouMedicao = true; // lido pelo Lead mesmo se o localStorage falhar
       if (!fbq.callMethod) fbq.queue.length = 0;
       fbq("consent", "revoke");
       apagarCookies();
