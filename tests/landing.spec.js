@@ -114,10 +114,10 @@ test('copy do canvas: selo, práticas e passos', async ({ page }) => {
       // textos soltos do canvas VersaoC3.dc.html, literais (não derivados do index.html)
       await expect(page.locator('header .marca'), estado).toHaveText('Aurora');
       await expect(page.locator('#promessa p.lead'), estado).toHaveText(
-        'O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.',
+        'Estamos formando o grupo do teste fechado. Deixe o seu Gmail e receba o convite para instalar o app pela Google Play.',
       );
-      await expect(page.locator('#promessa p.lead + p.suave'), estado).toHaveText(
-        'Estamos formando o grupo do teste fechado: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.',
+      await expect(page.locator('#passos .intro'), estado).toHaveText(
+        'O Aurora é um app de organização da rotina matinal: reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias. Antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade.',
       );
       await expect(page.locator('#praticas h2.sr'), estado).toHaveText('As seis práticas');
       await expect(page.locator('.nota-mosaico'), estado).toHaveText(
@@ -186,7 +186,7 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
       for (const n of await page.locator('#passos .n').all()) await expect(n, estado).toHaveAttribute('aria-hidden', 'true');
       // h2 dos passos e <strong> do teste fechado
       await expect(page.getByRole('heading', { level: 2, name: 'Como funciona o teste', exact: true }), estado).toHaveCount(1);
-      await expect(page.locator('#promessa p.suave strong'), estado).toHaveText('teste fechado');
+      await expect(page.locator('#promessa p.lead strong'), estado).toHaveText('teste fechado');
       // a imagem certa em cada tile
       for (const [nome, arquivo] of Object.entries(tiles)) {
         const tile = page.locator('#praticas .tile').filter({ has: page.locator('b', { hasText: new RegExp(`^${nome}$`) }) });
@@ -262,12 +262,12 @@ test('estrutura semântica, arranjo do hero e head nos dois estados', async ({ p
       await expect(page.locator('#praticas').getByRole('list'), estado).toHaveCount(2);
       await expect(page.locator('#praticas').getByRole('listitem'), estado).toHaveCount(6);
 
-      // coluna do hero: h1, lead, suave, depois o Portão (fechado e aberto)
+      // coluna do hero: h1, lead, depois o Portão (fechado e aberto)
       const ordem = await page.evaluate(() => {
-        const els = ['#promessa h1', '#promessa p.lead', '#promessa p.suave', '#cadastro', '#portao-aberto'].map((q) => document.querySelector(q));
+        const els = ['#promessa h1', '#promessa p.lead', '#cadastro', '#portao-aberto'].map((q) => document.querySelector(q));
         return els.slice(1).map((el, i) => Boolean(els[i].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
       });
-      expect(ordem, estado).toEqual([true, true, true, true]);
+      expect(ordem, estado).toEqual([true, true, true]);
       const lead = await page.locator('#promessa p.lead').boundingBox();
       const portao = await page.locator(estado === 'aberto' ? '#portao-aberto' : '#cadastro').boundingBox();
       expect(portao.y, `${estado} Portão abaixo do lead`).toBeGreaterThanOrEqual(lead.y + lead.height);
@@ -390,8 +390,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Cuide de você antes que o dia comece.",
   ];
   const hero = [
-    "O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.",
-    "Estamos formando o grupo do teste fechado: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.",
+    "Estamos formando o grupo do teste fechado. Deixe o seu Gmail e receba o convite para instalar o app pela Google Play.",
   ];
   const meio = [
     "As seis práticas",
@@ -409,6 +408,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Coloque pensamentos e gratidão no papel.",
     "Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.",
     "Como funciona o teste",
+    "O Aurora é um app de organização da rotina matinal: reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias. Antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade.",
     "1",
     "Entre na lista.",
     "Você deixa o seu Gmail e confirma que usa Android.",

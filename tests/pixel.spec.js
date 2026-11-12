@@ -178,7 +178,7 @@ for (const [largura, altura] of [
     try {
       await expect(page.locator("#medicao")).toBeVisible();
       const cobertos = await page.evaluate(() =>
-        [...document.querySelectorAll("[data-entrar]")]
+        [...document.querySelectorAll("input[type=email]")]
           .map((a) => {
             const r = a.getBoundingClientRect();
             if (r.bottom <= 0 || r.top >= innerHeight) return null;
@@ -191,7 +191,7 @@ for (const [largura, altura] of [
       );
       expect(cobertos).toEqual([]);
       const emViewport = await page
-        .locator("[data-entrar]")
+        .locator("input[type=email]")
         .first()
         .evaluate((a) => a.getBoundingClientRect().top < innerHeight);
       expect(emViewport).toBe(true);

@@ -209,7 +209,8 @@ test("estado enviando desabilita o botao e a confirmacao fica na pagina", async 
     await preencher(page);
     await entrar(page).click();
     const botao = page.locator("#entrar");
-    await expect(botao).toBeDisabled();
+    await expect(botao).toHaveAttribute("aria-disabled", "true");
+    await expect(botao).toBeFocused();
     await expect(botao).toHaveText("Enviando…");
     liberar();
     await expect(page.locator("#cadastro-ok")).toBeVisible();
@@ -320,7 +321,8 @@ test("falha do servico mantem dados", async ({ page }) => {
       await expect(android(page), caso.nome).toBeChecked();
       await expect(aceite(page), caso.nome).toBeChecked();
       await expect(aviso(page), caso.nome).toBeChecked();
-      await expect(page.locator("#entrar"), caso.nome).toBeEnabled();
+      await expect(page.locator("#entrar"), caso.nome).not.toHaveAttribute("aria-disabled", "true");
+      await expect(page.locator("#erro-envio"), caso.nome).toContainText("contato@auroramanha.com.br");
       await expect(page.locator("#entrar"), caso.nome).toHaveText(
         "Entrar na lista",
       );
@@ -406,6 +408,115 @@ for (const [largura, altura] of [
           resultado.ok,
           `${seletor} a ${largura}x${altura}: coberto pelo aviso (campo termina em ${resultado.fimDoCampo}, aviso começa em ${resultado.inicioDoAviso})`,
         ).toBe(true);
+      }
+    } finally {
+      alvo.fechar();
+    }
+  });
+}
+
+test("erro marca os três campos com aria-invalid e alinha o erro ao item", async ({
+  page,
+}) => {
+  const { alvo } = await abrir(page);
+  try {
+    await entrar(page).click();
+    for (const campo of [gmail(page), android(page), aceite(page)]) {
+      await expect(campo).toHaveAttribute("aria-invalid", "true");
+    }
+    // o erro do checkbox começa no texto do item, não na margem do cartão
+    const [texto, erro] = [
+      await page.locator("label.opcao span").first().boundingBox(),
+      await page.locator("#erro-android").boundingBox(),
+    ];
+    expect(Math.abs(erro.x + 36 - texto.x)).toBeLessThan(2);
+    // corrigir limpa a marca
+    await gmail(page).fill("pessoa@gmail.com");
+    await android(page).check();
+    await aceite(page).check();
+    await Promise.all([page.waitForRequest(ENDPOINT), entrar(page).click()]);
+    for (const campo of [gmail(page), android(page), aceite(page)]) {
+      await expect(campo).toHaveAttribute("aria-invalid", "false");
+    }
+  } finally {
+    alvo.fechar();
+  }
+});
+
+test("segundo clique durante o envio não repete o pedido", async ({ page }) => {
+  const { alvo, estado } = await abrir(page);
+  try {
+    let liberar;
+    estado.esperar = new Promise((r) => {
+      liberar = r;
+    });
+    await preencher(page);
+    await entrar(page).click();
+    await expect(page.locator("#entrar")).toHaveAttribute("aria-disabled", "true");
+    await page.locator("#entrar").click({ force: true });
+    liberar();
+    await expect(page.locator("#cadastro-ok")).toBeVisible();
+    expect(estado.pedidos).toHaveLength(1);
+  } finally {
+    alvo.fechar();
+  }
+});
+
+test("sucesso mostra o Gmail, lembra do spam e permite corrigir", async ({
+  page,
+}) => {
+  const { alvo, estado } = await abrir(page);
+  try {
+    await preencher(page, "pessoa@gmail.com");
+    await entrar(page).click();
+    const ok = page.locator("#cadastro-ok");
+    await expect(ok).toContainText("Vamos mandar o convite para pessoa@gmail.com.");
+    await expect(ok).toContainText("Se não chegar, olhe a caixa de spam.");
+    await expect(ok).not.toContainText(/gratuito|minutos|horas|prazo/i);
+    await page.getByRole("button", { name: "Corrigir o Gmail" }).click();
+    await expect(page.locator("#form-cadastro")).toBeVisible();
+    await expect(ok).toBeHidden();
+    await expect(gmail(page)).toBeFocused();
+    await expect(gmail(page)).toHaveValue("pessoa@gmail.com");
+    expect(estado.pedidos).toHaveLength(1);
+  } finally {
+    alvo.fechar();
+  }
+});
+
+test("sem rolagem horizontal a 200% de zoom em 390 px, com formulário e erros", async ({
+  page,
+}) => {
+  const { alvo } = await abrir(page);
+  try {
+    await page.setViewportSize({ width: 195, height: 600 });
+    await entrar(page).click();
+    const { scroll, cliente } = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      cliente: document.documentElement.clientWidth,
+    }));
+    expect(scroll).toBeLessThanOrEqual(cliente);
+  } finally {
+    alvo.fechar();
+  }
+});
+
+for (const [largura, altura] of [
+  [390, 844],
+  [1280, 720],
+]) {
+  test(`CTA dentro da primeira tela (${largura}x${altura})`, async ({ page }) => {
+    const { alvo } = await abrir(page);
+    try {
+      await page.setViewportSize({ width: largura, height: altura });
+      await page.goto(alvo.url, { waitUntil: "networkidle" });
+      const caixa = await entrar(page).boundingBox();
+      expect(caixa.y + caixa.height).toBeLessThanOrEqual(altura);
+      if (largura >= 960) {
+        const h1 = await page.evaluate(() =>
+          parseFloat(getComputedStyle(document.querySelector("h1")).fontSize),
+        );
+        expect(h1).toBeLessThanOrEqual(48);
       }
     } finally {
       alvo.fechar();
