@@ -343,8 +343,9 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   fbq("init", PIXEL_ID);
   fbq("track", "PageView");
   // ClicouEntrar dispara no clique do botão de envio, inclusive em tentativas inválidas (não conta cadastro; o cadastro é o Lead).
+  var recusou = false;
   document.querySelectorAll("[data-entrar]").forEach(function (a) {
-    a.addEventListener("click", function () { fbq("trackCustom", "ClicouEntrar"); });
+    a.addEventListener("click", function () { if (!recusou) fbq("trackCustom", "ClicouEntrar"); });
   });
   var aviso = document.getElementById("medicao");
   if (estado !== "ciente") aviso.hidden = false;
@@ -360,6 +361,8 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   }
   document.querySelectorAll("[data-recusar]").forEach(function (b) {
     b.addEventListener("click", function () {
+      recusou = true;
+      if (!fbq.callMethod) fbq.queue.length = 0;
       fbq("consent", "revoke");
       apagarCookies();
       gravar("recusada");
