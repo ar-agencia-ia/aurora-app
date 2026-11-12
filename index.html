@@ -102,7 +102,8 @@ footer>.link{display:inline-flex;align-items:center;min-height:48px;padding-bloc
 .form input[type=email][aria-invalid=true]{border:2px solid var(--error)}
 .form .opcao input[aria-invalid=true]{outline:2px solid var(--error);outline-offset:2px}
 .form input[aria-invalid=true]:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.form .opcao{display:flex;gap:var(--space-md);align-items:flex-start;min-height:48px;line-height:1.4}
+.form .opcao{display:flex;gap:var(--space-md);align-items:flex-start;min-height:48px;padding-block:6px;line-height:1.4}
+.form .opcao+.erro:empty+.opcao{margin-top:calc(-1*var(--space-md))}
 .form .opcao input{width:24px;height:24px;margin:0;flex:none;accent-color:var(--primary)}
 .form .opcao.suave{color:var(--ink-soft)}
 .form .cta{width:100%}
