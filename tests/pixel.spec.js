@@ -205,7 +205,7 @@ for (const [largura, altura] of [
 test("Recusar antes de o fbevents.js carregar não deixa PageView na fila", async ({
   page,
 }) => {
-  const alvo = await iniciar({ pixelId: ID, formsUrl: FORMS_TESTE });
+  const alvo = await iniciar({ pixelId: ID, chave: CHAVE_TESTE });
   let liberar;
   const portao = new Promise((r) => (liberar = r));
   await page.route(META, async (rota) => {
@@ -237,11 +237,6 @@ test("depois de Recusar, o clique em Entrar não registra ClicouEntrar", async (
   const { alvo } = await abrir(page);
   try {
     await page.locator("footer").getByRole("button", { name: "Recusar medição" }).click();
-    await page.route(FORMS_TESTE, (rota) => rota.fulfill({ body: "forms" }));
-    await page
-      .locator("[data-entrar]")
-      .first()
-      .evaluate((a) => a.addEventListener("click", (e) => e.preventDefault()));
     await page.locator("[data-entrar]").first().click();
     expect(await chamadas(page)).not.toContainEqual([
       "trackCustom",
