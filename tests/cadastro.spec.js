@@ -365,3 +365,50 @@ test("botcheck", async ({ page }) => {
     alvo.fechar();
   }
 });
+
+// O aviso fixo #medicao não pode cobrir os campos: depois de rolar até cada um do jeito mais curto
+// (focus(), o que o navegador faz ao navegar com Tab), o centro do campo é o próprio campo.
+for (const [largura, altura] of [
+  [1280, 720],
+  [360, 800],
+]) {
+  test(`aviso de medicao nao cobre os campos do formulario (${largura}x${altura})`, async ({
+    page,
+  }) => {
+    const { alvo } = await abrir(page, { pixel: true });
+    try {
+      await page.setViewportSize({ width: largura, height: altura });
+      await expect(page.locator("#medicao")).toBeVisible();
+      const campos = [
+        "#gmail",
+        'input[name="android"]',
+        'input[name="aceite"]',
+        'input[name="aviso"]',
+        "#entrar",
+      ];
+      for (const seletor of campos) {
+        const resultado = await page.evaluate((s) => {
+          const el = document.querySelector(s);
+          el.focus();
+          const r = el.getBoundingClientRect();
+          const topo = document.elementFromPoint(
+            r.left + r.width / 2,
+            r.top + r.height / 2,
+          );
+          const aviso = document.getElementById("medicao").getBoundingClientRect();
+          return {
+            ok: topo === el || el.contains(topo),
+            fimDoCampo: r.bottom,
+            inicioDoAviso: aviso.top,
+          };
+        }, seletor);
+        expect(
+          resultado.ok,
+          `${seletor} a ${largura}x${altura}: coberto pelo aviso (campo termina em ${resultado.fimDoCampo}, aviso começa em ${resultado.inicioDoAviso})`,
+        ).toBe(true);
+      }
+    } finally {
+      alvo.fechar();
+    }
+  });
+}

@@ -106,6 +106,8 @@ strong{font-weight:500}
 #cadastro-ok{max-width:32.5rem;background:var(--chip);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl)}
 #cadastro-ok p:last-child{margin-bottom:0}
 [hidden]{display:none!important}
+html:has(#medicao:not([hidden])){scroll-padding-bottom:14rem}
+body:has(#medicao:not([hidden])){padding-bottom:14rem}
 .medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:var(--space-lg)}
 .medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-md) var(--space-lg)}
 .medicao p{margin:0;flex:1 1 20rem;font-size:.875rem}
