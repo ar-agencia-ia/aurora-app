@@ -170,7 +170,7 @@ for (const estado of ["fechado", "aberto"]) {
           "Diário",
           "Entre na lista.",
           "Política de privacidade",
-          "Dúvidas ou pedido de exclusão:",
+          "Esta página ",
         ]) {
           expect(
             textos.join(" ").includes(esperado),

@@ -120,10 +120,9 @@ footer>.link{display:inline-flex;align-items:center;min-height:48px;padding-bloc
 .medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:8px var(--space-lg)}
 .medicao p{max-width:70ch;margin:0;flex:1 1 20rem;font-size:.8125rem;line-height:1.3}
 .medicao .acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-sm)}
-.medicao button,.recusar,.sec{min-height:48px;min-width:48px;padding:0 var(--space-xl);border:2px solid var(--primary-press);border-radius:24px;background:transparent;color:var(--primary-press);font:inherit;font-weight:500;cursor:pointer}
+.medicao button,.sec{min-height:48px;min-width:48px;padding:0 var(--space-xl);border:2px solid var(--primary-press);border-radius:24px;background:transparent;color:var(--primary-press);font:inherit;font-weight:500;cursor:pointer}
 .medicao button{padding:0 16px}
-.medicao button:focus-visible,.recusar:focus-visible,.sec:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.recusar{display:block;margin:var(--space-sm) 0;font-size:.875rem}
+.medicao button:focus-visible,.sec:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @media (min-width:60rem){.medicao{left:auto;right:var(--space-lg);bottom:var(--space-lg);max-width:26rem;border:1px solid var(--outline);border-radius:16px;padding:var(--space-lg)}}
 footer{padding-top:var(--space-section);padding-bottom:var(--space-section)}
 footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
@@ -175,7 +174,7 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
             <div class="sr" aria-hidden="true"><input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off"></div>
             <p id="erro-envio" class="erro" aria-live="polite"></p>
             <button id="entrar" class="cta" data-entrar type="submit">Entrar na lista</button>
-            <p class="apoio">Só para Android. <a class="link" href="/privacidade/">Política de privacidade</a>: por quanto tempo guardamos o Gmail e como pedir a exclusão.</p>
+            <p class="apoio">Só para Android. <a class="link" href="/privacidade/">Política de privacidade</a></p>
           </form>
           <div id="cadastro-ok" role="status" tabindex="-1" hidden>
             <p class="fechado">Você está na lista.</p>
@@ -222,14 +221,12 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   <a class="link" href="/privacidade/">Política de privacidade</a>
   <p>O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.</p>
   <p>O Aurora não substitui orientação médica ou psicológica.</p>
-  <p data-rodape-pixel>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.</p>
-  <button type="button" class="recusar" data-recusar data-com-pixel hidden>Recusar medição</button>
-  <p>Dúvidas ou pedido de exclusão: <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
+  <p data-rodape-pixel>Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.</p>
 </footer>
 
 <aside id="medicao" class="medicao" aria-label="Aviso de medição" hidden>
   <div class="miolo">
-    <p>Usamos o Pixel da Meta para medir os anúncios que trazem você até esta página. Ele grava o cookie _fbp e envia à Meta a sua visita e o clique em entrar.</p>
+    <p>Esta página usa cookies para medir os anúncios. Os detalhes estão na política de privacidade.</p>
     <div class="acoes">
       <a class="link" href="/privacidade/">Saiba mais</a>
       <button type="button" data-recusar>Recusar</button>
@@ -334,13 +331,11 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   var estado = null;
   try { estado = localStorage.getItem(CHAVE); } catch (e) {}
   function gravar(v) { try { localStorage.setItem(CHAVE, v); } catch (e) {} }
-  function mostrar(sel, ligado) { document.querySelectorAll(sel).forEach(function (el) { el.hidden = !ligado; }); }
   var rodape = document.querySelector("[data-rodape-pixel]");
   var textoSemPixel = rodape.textContent;
-  var textoComPixel = "Esta página usa o Pixel da Meta, que grava o cookie _fbp, para medir os anúncios que trazem você até aqui. Você pode recusar a medição. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.";
+  var textoComPixel = "Esta página usa cookies para medir os anúncios. Os detalhes estão na política de privacidade.";
   if (estado === "recusada") return;
   rodape.textContent = textoComPixel;
-  mostrar("[data-com-pixel]", true);
   !function (f, b, e, v, n, t, s) {
     if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
     if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = [];
@@ -374,7 +369,6 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
       apagarCookies();
       gravar("recusada");
       aviso.hidden = true;
-      mostrar("[data-com-pixel]", false);
       rodape.textContent = textoSemPixel;
     });
   });
