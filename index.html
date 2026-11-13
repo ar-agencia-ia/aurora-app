@@ -156,6 +156,27 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   .tile b{font-size:1rem}
   .passos{grid-template-columns:repeat(3,1fr)}
 }
+/* Opção B: título centralizado, e-mail e botão na mesma linha, seis práticas em fileira */
+.hero-grade>div:first-child{text-align:center}
+.hero-grade>div:first-child .lead{max-width:34rem;margin-left:auto;margin-right:auto}
+.form,#cadastro-ok{text-align:left}
+.entrar-bloco{margin-left:auto;margin-right:auto}
+.form .rotulo{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media (min-width:60rem){
+  .hero-grade{grid-template-columns:minmax(0,1fr);gap:56px;padding-top:32px}
+  h1{font-size:clamp(2.5rem,1.2rem + 2.4vw,3rem);max-width:15em;margin-left:auto;margin-right:auto}
+  .entrar-bloco,#cadastro-ok{max-width:45rem}
+  .form{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--space-sm);align-items:start;border-radius:36px;padding:var(--space-sm) var(--space-sm) var(--space-md)}
+  .form>*{grid-column:1/-1}
+  .form input[type=email]{grid-column:1;grid-row:1;border-radius:28px;padding:0 var(--space-xl)}
+  .form .cta{grid-column:2;grid-row:1;width:auto;margin-top:0}
+  .form .apoio{margin-top:var(--space-md)}
+  .mosaico{grid-template-columns:repeat(6,1fr)}
+  .mosaico .t-afirmacoes,.mosaico .t-leitura{margin-top:0}
+  .tile span{font-size:.8125rem}
+  .nota-mosaico{margin-left:auto;margin-right:auto;text-align:center}
+  .medicao{left:0;right:0;bottom:0;max-width:none;border:0;border-top:1px solid var(--outline);border-radius:0;padding:8px var(--space-lg)}
+}
 </style>
 </head>
 <body>
