@@ -130,12 +130,12 @@ test('copy do canvas: selo, práticas e passos', async ({ page }) => {
         'O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.',
       );
       await expect(rodape.nth(1), estado).toHaveText('O Aurora não substitui orientação médica ou psicológica.');
-      // divergência de propósito: o canvas diz "serviços de terceiros" e o index cita scripts de terceiros e o GitHub Pages
+      // divergência de propósito: texto genérico de cookies, sem hospedagem, formulário nem e-mail no rodapé
       await expect(rodape.nth(2), estado).toHaveText(
-        'Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.',
+        'Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.',
       );
-      // divergência de propósito: o canvas traz o Gmail do autor e o index traz contato@auroramanha.com.br (AC 30)
-      await expect(rodape.nth(3), estado).toHaveText(`Dúvidas ou pedido de exclusão: ${EMAIL}.`);
+      await expect(rodape, estado).toHaveCount(3);
+      await expect(page.locator('footer a[href^="mailto:"]'), estado).toHaveCount(0);
       const fechado = page.locator('#portao-fechado');
       const bloco = page.locator('#portao-aberto');
       if (estado === 'aberto') {
@@ -146,7 +146,7 @@ test('copy do canvas: selo, práticas e passos', async ({ page }) => {
           'Opcional: quero ser avisado quando o app for lançado.',
         ]);
         await expect(bloco.locator('form > p.apoio')).toHaveText(
-          'Só para Android. Política de privacidade: por quanto tempo guardamos o Gmail e como pedir a exclusão.',
+          'Só para Android. Política de privacidade',
         );
         await expect(fechado).toBeHidden();
         await expect(bloco).toBeVisible();
@@ -172,12 +172,12 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
     const alvo = await iniciar(estado === 'aberto' ? { chave: CHAVE_TESTE } : {});
     try {
       await page.goto(alvo.url, { waitUntil: 'networkidle' });
-      // e-mail de contato: texto e href literais no bloco fechado e no rodapé (AC 30)
-      for (const email of [page.locator('#cadastro a[href^="mailto:"]'), page.locator('footer a[href^="mailto:"]')]) {
-        await expect(email, estado).toHaveCount(1);
-        await expect(email, estado).toHaveText(EMAIL);
-        await expect(email, estado).toHaveAttribute('href', `mailto:${EMAIL}`);
-      }
+      // e-mail de contato: texto e href literais só no bloco fechado (AC 30); o rodapé não tem e-mail
+      const email = page.locator('#cadastro a[href^="mailto:"]');
+      await expect(email, estado).toHaveCount(1);
+      await expect(email, estado).toHaveText(EMAIL);
+      await expect(email, estado).toHaveAttribute('href', `mailto:${EMAIL}`);
+      await expect(page.locator('footer a[href^="mailto:"]'), estado).toHaveCount(0);
       // o canvas fixa alt="" (decorativas) nas 7 imagens, lang pt-BR e aria-hidden nos numerais
       await expect(page.locator('img'), estado).toHaveCount(7);
       for (const img of await page.locator('img').all()) await expect(img, estado).toHaveAttribute('alt', '');
@@ -379,7 +379,7 @@ test('rodapé aponta para a política no próprio domínio, igual à fonte e sem
 });
 // AC 13 (sem depoimento, estrelas nem contagem de usuários) por mundo fechado: todo o texto visível da página
 // é exatamente a lista do canvas VersaoC3.dc.html (sha256 0e6b8221...) mais as divergências de propósito do C33
-// (e-mail contato@auroramanha.com.br no lugar do Gmail, frase de terceiros e GitHub Pages, <noscript> fora da tela).
+// (e-mail contato@auroramanha.com.br no lugar do Gmail, texto genérico de cookies no rodapé, <noscript> fora da tela).
 // Texto acrescentado em qualquer ponto (antes de </main>, nos passos, na banda, no rodapé) muda a lista e falha.
 test("mundo fechado: o texto visível é só o do canvas e não há depoimento, citação nem figura", async ({
   page,
@@ -423,8 +423,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Política de privacidade",
     "O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.",
     "O Aurora não substitui orientação médica ou psicológica.",
-    "Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.",
-    `Dúvidas ou pedido de exclusão: ${EMAIL}.`,
+    "Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.",
   ];
   const esperado = {
     fechado: [
@@ -443,7 +442,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
       "Aceito participar do teste fechado por no mínimo 14 dias e que o Aurora use o meu Gmail só para esse convite.",
       "Opcional: quero ser avisado quando o app for lançado.",
       "Entrar na lista",
-      "Só para Android. Política de privacidade: por quanto tempo guardamos o Gmail e como pedir a exclusão.",
+      "Só para Android. Política de privacidade",
       ...meio,
       ...rodape,
     ],
