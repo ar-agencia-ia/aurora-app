@@ -86,7 +86,7 @@ strong{font-weight:500}
 .passos .n{font-size:4rem;line-height:1;font-weight:400;letter-spacing:-1px;color:var(--primary-press)}
 .passos strong{font-size:1.25rem;line-height:1.3;letter-spacing:.15px;text-wrap:balance}
 .passos p{margin:0;color:var(--ink-band)}
-.status{background:var(--chip);color:var(--ink);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl);max-width:32.5rem}
+.status{background:var(--chip);color:var(--ink);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl);max-width:32.5rem;margin-left:auto;margin-right:auto}
 .status p:last-of-type{margin-bottom:0}
 .fechado{font-weight:500;font-size:1.125rem}
 .entrar-bloco{max-width:32.5rem}
@@ -109,7 +109,7 @@ footer>.link{display:inline-flex;align-items:center;min-height:48px;padding-bloc
 .form .opcao{display:flex;gap:var(--space-md);align-items:flex-start;min-height:48px;padding-block:var(--space-sm);line-height:1.4;cursor:pointer}
 #erro-email+.opcao{margin-top:4px}
 .form .opcao span{padding-top:1px}
-.form .opcao input{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin:0;flex:none;border:2px solid var(--outline);border-radius:6px;background:var(--bg) center/100% no-repeat;cursor:pointer}
+.form .opcao input{-webkit-appearance:none;appearance:none;width:1.5rem;height:1.5rem;margin:0;flex:none;border:2px solid var(--outline);border-radius:6px;background:var(--bg) center/100% no-repeat;cursor:pointer}
 .form .opcao:hover input{border-color:var(--primary)}
 .form .opcao input[aria-invalid=true]{border-color:var(--error)}
 .form .opcao input:checked{border-color:var(--primary);background-color:var(--primary);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
@@ -133,7 +133,7 @@ footer>.link{display:inline-flex;align-items:center;min-height:48px;padding-bloc
 @media (forced-colors:active){.form .opcao input{-webkit-appearance:auto;appearance:auto}.cta[aria-disabled=true]{background-image:none;padding-left:40px}.erro,#erro-envio{background-image:none}}
 [hidden]{display:none!important}
 :root{scroll-padding-bottom:9rem}
-.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:8px var(--space-lg)}
+.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;max-height:40vh;overflow-y:auto;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:8px var(--space-lg)}
 .medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:8px var(--space-lg)}
 .medicao p{max-width:70ch;margin:0;flex:1 1 20rem;font-size:.8125rem;line-height:1.3}
 .medicao .acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-sm)}
@@ -142,6 +142,7 @@ footer>.link{display:inline-flex;align-items:center;min-height:48px;padding-bloc
 .medicao button:focus-visible,.sec:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @media (min-width:60rem){.medicao{left:auto;right:var(--space-lg);bottom:var(--space-lg);max-width:26rem;border:1px solid var(--outline);border-radius:16px;padding:var(--space-lg)}}
 footer{padding-top:var(--space-section);padding-bottom:var(--space-section)}
+body:has(.medicao:not([hidden])) footer{padding-bottom:calc(var(--space-section) + 9.5rem)}
 footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
 @media (min-width:600px){h1{font-size:clamp(2.5rem,1.2rem + 3.6vw,3.75rem)}}
 @media (min-width:60rem){
@@ -161,8 +162,8 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
 .hero-grade>div:first-child .lead{max-width:34rem;margin-left:auto;margin-right:auto}
 .form,#cadastro-ok{text-align:left}
 .entrar-bloco{margin-left:auto;margin-right:auto}
-.form .rotulo{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 @media (min-width:60rem){
+  .form .rotulo{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
   .hero-grade{grid-template-columns:minmax(0,1fr);gap:56px;padding-top:32px}
   h1{font-size:clamp(2.5rem,1.2rem + 2.4vw,3rem);max-width:15em;margin-left:auto;margin-right:auto}
   .entrar-bloco,#cadastro-ok{max-width:45rem}
@@ -175,6 +176,8 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   .mosaico .t-afirmacoes,.mosaico .t-leitura{margin-top:0}
   .tile span{font-size:.8125rem}
   .nota-mosaico{margin-left:auto;margin-right:auto;text-align:center}
+  body:has(.medicao:not([hidden])) footer{padding-bottom:calc(var(--space-section) + 5rem)}
+  .medicao p{max-width:none}
   .medicao{left:0;right:0;bottom:0;max-width:none;border:0;border-top:1px solid var(--outline);border-radius:0;padding:8px var(--space-lg)}
 }
 </style>
