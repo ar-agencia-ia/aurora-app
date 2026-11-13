@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const { iniciar } = require("./servidor");
 
-const FORMS_TESTE = "https://forms.example.test/aurora-teste";
+const CHAVE_TESTE = "chave-de-teste-web3forms";
 
 // Contraste WCAG medido no navegador (AC 14): para todo texto visível do <main> e do <footer>, a cor vem de
 // getComputedStyle (com a opacidade dos ancestrais e o alfa da cor) e o fundo efetivo vem da cadeia de ancestrais:
@@ -154,7 +154,7 @@ for (const estado of ["fechado", "aberto"]) {
       page,
     }) => {
       const alvo = await iniciar(
-        estado === "aberto" ? { formsUrl: FORMS_TESTE } : {},
+        estado === "aberto" ? { chave: CHAVE_TESTE } : {},
       );
       try {
         await page.setViewportSize({ width: largura, height: 900 });
@@ -180,8 +180,8 @@ for (const estado of ["fechado", "aberto"]) {
         if (estado === "aberto")
           expect(
             textos.filter((t) => t === "Entrar na lista"),
-            "os dois CTAs",
-          ).toHaveLength(2);
+            "o CTA",
+          ).toHaveLength(1);
         expect(medidas.length, "textos medidos").toBeGreaterThanOrEqual(
           estado === "aberto" ? 30 : 27,
         );

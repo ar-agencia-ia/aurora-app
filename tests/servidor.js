@@ -4,12 +4,12 @@ const path = require('path');
 
 const RAIZ = path.resolve(__dirname, '..');
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
-const PORTAO = /var FORMS_URL = "[^"]*";/;
+const PORTAO = /var WEB3FORMS_KEY = "[^"]*";/;
 const PIXEL = /var PIXEL_ID = "[^"]*";/;
 
-// Serve a landing do disco. Troca o valor do Portão em memória (`formsUrl` abre, sem ele fecha) e o `PIXEL_ID` (`pixelId` liga o Pixel, sem ele fica desligado).
+// Serve a landing do disco. Troca o valor do Portão em memória (`chave` abre, sem ele fecha) e o `PIXEL_ID` (`pixelId` liga o Pixel, sem ele fica desligado).
 // Assim os testes dos dois estados valem seja qual for o valor commitado em index.html.
-function iniciar({ formsUrl, pixelId } = {}) {
+function iniciar({ chave, pixelId } = {}) {
   const servidor = http.createServer((req, res) => {
     const rota = req.url.split('?')[0];
     const arquivo = path.join(RAIZ, rota.endsWith('/') ? rota + 'index.html' : rota);
@@ -24,7 +24,7 @@ function iniciar({ formsUrl, pixelId } = {}) {
       if (!PIXEL.test(html)) throw new Error('PIXEL_ID não encontrado em index.html');
       corpo = Buffer.from(
         html
-          .replace(PORTAO, () => `var FORMS_URL = ${JSON.stringify(formsUrl || '')};`)
+          .replace(PORTAO, () => `var WEB3FORMS_KEY = ${JSON.stringify(chave || "")};`)
           .replace(PIXEL, () => `var PIXEL_ID = ${JSON.stringify(pixelId || '')};`),
       );
     }

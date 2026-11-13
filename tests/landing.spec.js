@@ -14,12 +14,12 @@ test('sem terceiros nem cookie', async ({ page, context }) => {
   expect(await page.evaluate(() => document.cookie)).toBe('');
 });
 
-const FORMS_TESTE = 'https://forms.example.test/aurora-teste';
+const CHAVE_TESTE = "chave-de-teste-web3forms";
 const EMAIL = 'contato@auroramanha.com.br';
 
 // Mede a landing nos dois estados do Portão: o CTA principal só existe no aberto.
 for (const estado of ['fechado', 'aberto']) {
-  const servir = () => iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+  const servir = () => iniciar(estado === 'aberto' ? { chave: CHAVE_TESTE } : {});
 
   test(`sem rolagem horizontal a 360 px (${estado})`, async ({ page }) => {
     const alvo = await servir();
@@ -51,7 +51,7 @@ for (const estado of ['fechado', 'aberto']) {
       );
       expect(alvos.length).toBeGreaterThan(0);
       if (estado === 'aberto') {
-        expect(alvos.filter((a) => a.texto === 'Entrar na lista')).toHaveLength(2);
+        expect(alvos.filter((a) => a.texto === 'Entrar na lista')).toHaveLength(1);
       }
       for (const a of alvos) {
         expect(a.altura, `${a.texto} altura`).toBeGreaterThanOrEqual(48);
@@ -64,7 +64,7 @@ for (const estado of ['fechado', 'aberto']) {
 }
 
 test('composição da landing', async ({ page }) => {
-  const aberto = await iniciar({ formsUrl: FORMS_TESTE });
+  const aberto = await iniciar({ chave: CHAVE_TESTE });
   try {
     await page.goto(aberto.url, { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cuide de você antes que o dia comece.');
@@ -73,23 +73,23 @@ test('composição da landing', async ({ page }) => {
     const passos = await page.locator('#passos ol > li strong').allTextContents();
     expect(passos).toEqual([
       'Entre na lista.',
-      'Receba o convite.',
+      'Receba o convite por e-mail.',
       'Use o app e dê feedback por no mínimo 14 dias.',
     ]);
-    // ordem das regiões: promessa com o mosaico, passos, cadastro, rodapé
+    // ordem das regiões: promessa com o formulário e o mosaico, passos, rodapé
     const ordem = await page.evaluate(() => {
       const seguinte = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-      const [promessa, praticasEl, passosEl, cadastro, rodape] = ['#promessa', '#praticas', '#passos', '#cadastro-fim', 'footer']
+      const [promessa, praticasEl, passosEl, rodape, form] = ['#promessa', '#praticas', '#passos', 'footer', '#form-cadastro']
         .map((q) => document.querySelector(q));
-      return [seguinte(promessa, passosEl), seguinte(praticasEl, passosEl), seguinte(passosEl, cadastro), seguinte(cadastro, rodape)];
+      return [seguinte(promessa, passosEl), seguinte(praticasEl, passosEl), seguinte(passosEl, rodape), promessa.contains(form), seguinte(form, praticasEl)];
     });
-    expect(ordem).toEqual([true, true, true, true]);
+    expect(ordem).toEqual([true, true, true, true, true]);
   } finally {
     aberto.fechar();
   }
 });
 
-test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', async ({ page }) => {
+test('copy do canvas: selo, práticas e passos', async ({ page }) => {
   const frases = [
     'Abra um espaço de calma antes da correria.',
     'Imagine com clareza como você quer viver o seu dia.',
@@ -99,12 +99,12 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
     'Coloque pensamentos e gratidão no papel.',
   ];
   const textosPassos = [
-    'Você entra com a sua conta Google e confirma que usa Android.',
-    'Mandamos por e-mail o link para instalar o app pela Google Play.',
+    'Você deixa o seu Gmail e confirma que usa Android.',
+    'Mandamos o link para instalar o app pela Google Play.',
     'Use a rotina no seu dia a dia e envie o seu retorno durante todo o período do teste.',
   ];
   for (const estado of ['fechado', 'aberto']) {
-    const alvo = await iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+    const alvo = await iniciar(estado === 'aberto' ? { chave: CHAVE_TESTE } : {});
     try {
       await page.goto(alvo.url, { waitUntil: 'networkidle' });
       await expect(page.locator('header .selo'), estado).toHaveText('Teste fechado no Android');
@@ -114,10 +114,10 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
       // textos soltos do canvas VersaoC3.dc.html, literais (não derivados do index.html)
       await expect(page.locator('header .marca'), estado).toHaveText('Aurora');
       await expect(page.locator('#promessa p.lead'), estado).toHaveText(
-        'O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.',
+        'Estamos formando o grupo do teste fechado. Deixe o seu Gmail e receba o convite para instalar o app pela Google Play.',
       );
-      await expect(page.locator('#promessa p.lead + p.suave'), estado).toHaveText(
-        'Estamos formando o grupo do teste fechado: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.',
+      await expect(page.locator('#passos .intro'), estado).toHaveText(
+        'O Aurora é um app de organização da rotina matinal: reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias. Antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade.',
       );
       await expect(page.locator('#praticas h2.sr'), estado).toHaveText('As seis práticas');
       await expect(page.locator('.nota-mosaico'), estado).toHaveText(
@@ -132,19 +132,21 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
       await expect(rodape.nth(1), estado).toHaveText('O Aurora não substitui orientação médica ou psicológica.');
       // divergência de propósito: o canvas diz "serviços de terceiros" e o index cita scripts de terceiros e o GitHub Pages
       await expect(rodape.nth(2), estado).toHaveText(
-        'Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.',
+        'Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.',
       );
       // divergência de propósito: o canvas traz o Gmail do autor e o index traz contato@auroramanha.com.br (AC 30)
       await expect(rodape.nth(3), estado).toHaveText(`Dúvidas ou pedido de exclusão: ${EMAIL}.`);
       const fechado = page.locator('#portao-fechado');
       const bloco = page.locator('#portao-aberto');
-      const banda = page.locator('#cadastro-fim');
       if (estado === 'aberto') {
-        await expect(bloco.locator('p').nth(0)).toHaveText(
-          'Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, marque a opção de aviso de lançamento.',
-        );
-        await expect(bloco.locator('p').nth(1)).toHaveText(
-          'Só para Android. O formulário abre no Google Forms; a política de privacidade, no rodapé, diz por quanto tempo guardamos os dados e como pedir a exclusão.',
+        await expect(bloco.locator('label.rotulo')).toHaveText('Seu Gmail');
+        await expect(bloco.locator('label.opcao span')).toHaveText([
+          'Uso um celular Android',
+          'Aceito participar do teste fechado por no mínimo 14 dias e que o Aurora use o meu Gmail só para esse convite.',
+          'Opcional: quero ser avisado quando o app for lançado.',
+        ]);
+        await expect(bloco.locator('form > p.apoio')).toHaveText(
+          'Só para Android. Política de privacidade: por quanto tempo guardamos o Gmail e como pedir a exclusão.',
         );
         await expect(fechado).toBeHidden();
         await expect(bloco).toBeVisible();
@@ -154,13 +156,7 @@ test('copy do canvas: selo, práticas, passos e banda "Pronto para ajudar?"', as
         await expect(page.locator('#cadastro p').nth(1)).toHaveText(`Dúvidas? Escreva para ${EMAIL}.`);
         await expect(bloco).toBeHidden();
       }
-      if (estado === 'aberto') {
-        await expect(banda).toBeVisible();
-        await expect(banda.getByRole('heading', { level: 2, name: 'Pronto para ajudar?', exact: true })).toBeVisible();
-      } else {
-        await expect(banda).toBeHidden();
-        await expect(page.getByText('Pronto para ajudar?')).toBeHidden();
-      }
+      await expect(page.getByText('Pronto para ajudar?')).toHaveCount(0);
     } finally {
       alvo.fechar();
     }
@@ -173,7 +169,7 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
     Afirmações: 'afirmacoes', Exercício: 'exercicio', Diário: 'diario',
   };
   for (const estado of ['fechado', 'aberto']) {
-    const alvo = await iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+    const alvo = await iniciar(estado === 'aberto' ? { chave: CHAVE_TESTE } : {});
     try {
       await page.goto(alvo.url, { waitUntil: 'networkidle' });
       // e-mail de contato: texto e href literais no bloco fechado e no rodapé (AC 30)
@@ -190,7 +186,7 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
       for (const n of await page.locator('#passos .n').all()) await expect(n, estado).toHaveAttribute('aria-hidden', 'true');
       // h2 dos passos e <strong> do teste fechado
       await expect(page.getByRole('heading', { level: 2, name: 'Como funciona o teste', exact: true }), estado).toHaveCount(1);
-      await expect(page.locator('#promessa p.suave strong'), estado).toHaveText('teste fechado');
+      await expect(page.locator('#promessa p.lead strong'), estado).toHaveText('teste fechado');
       // a imagem certa em cada tile
       for (const [nome, arquivo] of Object.entries(tiles)) {
         const tile = page.locator('#praticas .tile').filter({ has: page.locator('b', { hasText: new RegExp(`^${nome}$`) }) });
@@ -200,13 +196,13 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
       const primeiro = page.locator('footer > :first-child');
       await expect(primeiro, estado).toHaveText('Política de privacidade');
       expect(await primeiro.evaluate((el) => el.tagName), estado).toBe('A');
-      await expect(page.getByRole('link', { name: 'Política de privacidade', exact: true }), estado).toHaveCount(1);
+      await expect(page.locator('footer').getByRole('link', { name: 'Política de privacidade', exact: true }), estado).toHaveCount(1);
       // só do index.html (O6): aria-labelledby das regiões e o <noscript> do bloco fechado
       await expect(page.locator('#promessa'), estado).toHaveAttribute('aria-labelledby', 'titulo');
       await expect(page.locator('#passos'), estado).toHaveAttribute('aria-labelledby', 'titulo-passos');
       // com JavaScript ativo o navegador trata o <noscript> como texto cru, então lê-se o textContent
       expect(await page.locator('#cadastro noscript').evaluate((el) => el.textContent), estado).toContain(
-        'Se as inscrições já tiverem aberto, o botão de entrada só aparece com o JavaScript ativo.',
+        'Se as inscrições já tiverem aberto, o formulário só aparece com o JavaScript ativo.',
       );
     } finally {
       alvo.fechar();
@@ -228,7 +224,7 @@ test('estrutura semântica, arranjo do hero e head nos dois estados', async ({ p
     'meta[property="og:image:height"]': '630',
   };
   for (const estado of ['fechado', 'aberto']) {
-    const alvo = await iniciar(estado === 'aberto' ? { formsUrl: FORMS_TESTE } : {});
+    const alvo = await iniciar(estado === 'aberto' ? { chave: CHAVE_TESTE } : {});
     try {
       await page.goto(alvo.url, { waitUntil: 'networkidle' });
       // head: viewport (sem ele o celular do anúncio renderiza a 980 px), título e pré-visualização do anúncio
@@ -248,7 +244,7 @@ test('estrutura semântica, arranjo do hero e head nos dois estados', async ({ p
       // <main> com hero, mosaico, passos e banda; <footer> fora dele
       const main = page.getByRole('main');
       await expect(main, estado).toHaveCount(1);
-      for (const q of ['.hero', '#promessa', '#praticas', '#passos', '#cadastro-fim']) {
+      for (const q of ['.hero', '#promessa', '#praticas', '#passos']) {
         await expect(main.locator(q), `${estado} ${q} dentro do main`).toHaveCount(1);
       }
       await expect(page.getByRole('contentinfo'), estado).toHaveCount(1);
@@ -266,12 +262,12 @@ test('estrutura semântica, arranjo do hero e head nos dois estados', async ({ p
       await expect(page.locator('#praticas').getByRole('list'), estado).toHaveCount(2);
       await expect(page.locator('#praticas').getByRole('listitem'), estado).toHaveCount(6);
 
-      // coluna do hero: h1, lead, suave, depois o Portão (fechado e aberto)
+      // coluna do hero: h1, lead, depois o Portão (fechado e aberto)
       const ordem = await page.evaluate(() => {
-        const els = ['#promessa h1', '#promessa p.lead', '#promessa p.suave', '#cadastro', '#portao-aberto'].map((q) => document.querySelector(q));
+        const els = ['#promessa h1', '#promessa p.lead', '#cadastro', '#portao-aberto'].map((q) => document.querySelector(q));
         return els.slice(1).map((el, i) => Boolean(els[i].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
       });
-      expect(ordem, estado).toEqual([true, true, true, true]);
+      expect(ordem, estado).toEqual([true, true, true]);
       const lead = await page.locator('#promessa p.lead').boundingBox();
       const portao = await page.locator(estado === 'aberto' ? '#portao-aberto' : '#cadastro').boundingBox();
       expect(portao.y, `${estado} Portão abaixo do lead`).toBeGreaterThanOrEqual(lead.y + lead.height);
@@ -350,22 +346,20 @@ test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canv
   expect(Math.max(...passos.map((b) => b.y)) - Math.min(...passos.map((b) => b.y)), 'passos na mesma linha').toBeLessThan(2);
 });
 
-test('abrir o Portão mostra Entrar na lista com a URL do Forms', async ({ page }) => {
-  const aberto = await iniciar({ formsUrl: FORMS_TESTE });
+test('abrir o Portão mostra o formulário Entrar na lista e esconde o aviso de fechado', async ({ page }) => {
+  const aberto = await iniciar({ chave: CHAVE_TESTE });
   try {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto(aberto.url, { waitUntil: 'networkidle' });
-    const botoes = page.getByRole('link', { name: 'Entrar na lista' });
-    await expect(botoes).toHaveCount(2);
-    for (const botao of await botoes.all()) {
-      await expect(botao).toBeVisible();
-      await expect(botao).toHaveAttribute('href', FORMS_TESTE);
-    }
+    await expect(page.getByRole('button', { name: 'Entrar na lista' })).toBeVisible();
+    await expect(page.getByLabel('Seu Gmail')).toBeVisible();
+    await expect(page.getByLabel('Seu Gmail')).toHaveAttribute('type', 'email');
+    await expect(page.getByLabel('Seu Gmail')).toHaveAttribute('placeholder', 'nome@gmail.com');
     await expect(page.getByText('As inscrições ainda não abriram.')).toBeHidden();
-    for (const botao of await botoes.all()) {
-      const alvo = await botao.boundingBox();
-      expect(alvo.height).toBeGreaterThanOrEqual(48);
-    }
+    // sem link para o Google Forms
+    await expect(page.locator('a[href*="docs.google.com/forms"]')).toHaveCount(0);
+    const alvo = await page.getByRole('button', { name: 'Entrar na lista' }).boundingBox();
+    expect(alvo.height).toBeGreaterThanOrEqual(48);
   } finally {
     aberto.fechar();
   }
@@ -396,8 +390,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Cuide de você antes que o dia comece.",
   ];
   const hero = [
-    "O Aurora é um app de organização da rotina matinal. Ele reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias.",
-    "Estamos formando o grupo do teste fechado: antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade. Você pode ajudar.",
+    "Estamos formando o grupo do teste fechado. Deixe o seu Gmail e receba o convite para instalar o app pela Google Play.",
   ];
   const meio = [
     "As seis práticas",
@@ -415,12 +408,13 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Coloque pensamentos e gratidão no papel.",
     "Você escolhe quais fazem parte da sua manhã, a ordem e quanto tempo dedicar a cada uma.",
     "Como funciona o teste",
+    "O Aurora é um app de organização da rotina matinal: reúne seis práticas em um só lugar e mostra no Painel do dia o que você já fez e a sua sequência de dias. Antes de chegar à loja, o Google exige que o app seja testado por pessoas de verdade.",
     "1",
     "Entre na lista.",
-    "Você entra com a sua conta Google e confirma que usa Android.",
+    "Você deixa o seu Gmail e confirma que usa Android.",
     "2",
-    "Receba o convite.",
-    "Mandamos por e-mail o link para instalar o app pela Google Play.",
+    "Receba o convite por e-mail.",
+    "Mandamos o link para instalar o app pela Google Play.",
     "3",
     "Use o app e dê feedback por no mínimo 14 dias.",
     "Use a rotina no seu dia a dia e envie o seu retorno durante todo o período do teste.",
@@ -429,7 +423,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Política de privacidade",
     "O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.",
     "O Aurora não substitui orientação médica ou psicológica.",
-    "Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o formulário de inscrição é do Google Forms.",
+    "Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.",
     `Dúvidas ou pedido de exclusão: ${EMAIL}.`,
   ];
   const esperado = {
@@ -444,18 +438,19 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     aberto: [
       ...marca,
       ...hero,
-      "Ao entrar você deixa o seu Gmail, confirma que usa Android e aceita participar do teste. Se quiser, marque a opção de aviso de lançamento.",
+      "Seu Gmail",
+      "Uso um celular Android",
+      "Aceito participar do teste fechado por no mínimo 14 dias e que o Aurora use o meu Gmail só para esse convite.",
+      "Opcional: quero ser avisado quando o app for lançado.",
       "Entrar na lista",
-      "Só para Android. O formulário abre no Google Forms; a política de privacidade, no rodapé, diz por quanto tempo guardamos os dados e como pedir a exclusão.",
+      "Só para Android. Política de privacidade: por quanto tempo guardamos o Gmail e como pedir a exclusão.",
       ...meio,
-      "Pronto para ajudar?",
-      "Entrar na lista",
       ...rodape,
     ],
   };
   for (const estado of ["fechado", "aberto"]) {
     const alvo = await iniciar(
-      estado === "aberto" ? { formsUrl: FORMS_TESTE } : {},
+      estado === "aberto" ? { chave: CHAVE_TESTE } : {},
     );
     try {
       for (const largura of [360, 1280]) {
@@ -476,7 +471,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
           `${estado} ${largura} px`,
         ).toHaveCount(0);
         // F23: texto gerado por CSS não entra em innerText; nenhum pseudo-elemento pode gerar conteúdo
-        // (a landing só usa ::selection, sem content) e não há campo de entrada nem placeholder
+        // (a landing só usa ::selection, sem content) e, no mundo fechado, nenhum campo de entrada fica visível
         const gerados = await page.evaluate(() => {
           const achados = [];
           for (const el of document.querySelectorAll("html, body, body *"))
@@ -503,10 +498,12 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
           return achados;
         });
         expect(gerados, `${estado} ${largura} px: texto gerado por pseudo-elemento ou marcador`).toEqual([]);
-        await expect(
-          page.locator("input, textarea, select, [placeholder]"),
-          `${estado} ${largura} px`,
-        ).toHaveCount(0);
+        if (estado === "fechado") {
+          for (const campo of await page.locator("input, textarea, select, [placeholder]").all()) {
+            await expect(campo, `${estado} ${largura} px`).toBeHidden();
+          }
+          await expect(page.locator("#form-cadastro"), `${estado} ${largura} px`).toBeHidden();
+        }
       }
     } finally {
       alvo.fechar();
@@ -520,7 +517,7 @@ test("interação, forma e tipografia do canvas nos dois estados", async ({
 }) => {
   for (const estado of ["fechado", "aberto"]) {
     const alvo = await iniciar(
-      estado === "aberto" ? { formsUrl: FORMS_TESTE } : {},
+      estado === "aberto" ? { chave: CHAVE_TESTE } : {},
     );
     try {
       await page.setViewportSize({ width: 360, height: 800 });
@@ -531,14 +528,15 @@ test("interação, forma e tipografia do canvas nos dois estados", async ({
         "charset",
         /^utf-8$/i,
       );
-      for (const id of ["#promessa", "#passos", "#cadastro-fim"]) {
+      for (const id of ["#promessa", "#passos"]) {
         expect(
           await page.locator(id).evaluate((e) => e.tagName),
           `${estado} ${id}`,
         ).toBe("SECTION");
       }
-      // foco visível por teclado em todo link, contorno de 3 px; sublinhado nos links do texto
-      const total = await page.locator("a:visible").count();
+      // foco visível por teclado em todo link e campo, contorno de 3 px; sublinhado nos links do texto
+      const focaveis = 'a:visible, input:visible:not([tabindex="-1"]), button:visible';
+      const total = await page.locator(focaveis).count();
       expect(total, estado).toBeGreaterThan(0);
       await page.evaluate(
         () => document.activeElement && document.activeElement.blur(),
@@ -553,7 +551,7 @@ test("interação, forma e tipografia do canvas nos dois estados", async ({
             largura: parseFloat(s.outlineWidth),
           };
         });
-        expect(foco.tag, `${estado} foco ${i}`).toBe("A");
+        expect(["A", "INPUT", "BUTTON"], `${estado} foco ${i}`).toContain(foco.tag);
         expect(foco.estilo, `${estado} foco ${i}`).toBe("solid");
         expect(foco.largura, `${estado} foco ${i}`).toBeGreaterThanOrEqual(3);
       }
@@ -563,13 +561,10 @@ test("interação, forma e tipografia do canvas nos dois estados", async ({
           estado,
         ).toContain("underline");
       }
-      // CTA: mesma aba (sem target), rel noopener, hover muda o fundo
+      // CTA: botão de envio, hover muda o fundo
       if (estado === "aberto") {
-        for (const cta of await page.locator("a.cta").all()) {
-          await expect(cta, estado).not.toHaveAttribute("target", /.*/);
-          await expect(cta, estado).toHaveAttribute("rel", "noopener");
-        }
-        const cta = page.locator("a.cta").first();
+        await expect(page.locator("button.cta"), estado).toHaveCount(1);
+        const cta = page.locator("button.cta").first();
         const antes = await cta.evaluate(
           (e) => getComputedStyle(e).backgroundColor,
         );
@@ -599,7 +594,7 @@ test("interação, forma e tipografia do canvas nos dois estados", async ({
       expect(tipo.apoio, `${estado} rodapé`).toBeGreaterThanOrEqual(14);
       expect(tipo.numeral, `${estado} numerais`).toBeGreaterThanOrEqual(48);
       // forma: faixa dos passos e banda com fundo; tiles com raio, imagem 1:1; mosaico em 2 colunas a 360 px (O11)
-      for (const id of ["#passos", "#cadastro-fim"]) {
+      for (const id of ["#passos"]) {
         expect(
           await page
             .locator(id)
