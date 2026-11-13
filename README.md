@@ -1,6 +1,6 @@
 # Aurora: landing do teste fechado
 
-Repo público só da página: HTML e CSS estáticos, sem build e sem script de terceiros, publicados pelo GitHub Pages a partir de `main`, no domínio `auroramanha.com.br` (DNS na Cloudflare, e-mail `contato@auroramanha.com.br` por Email Routing). Tudo o que é marketing (kit de textos, runbook do piloto, orçamento) fica no repo privado `aurora-marketing`.
+Repo público só da página: HTML e CSS estáticos, sem build e com um único script de terceiro, o Pixel da Meta (medição dos anúncios, com aviso e opção de recusar; `PIXEL_ID` em `index.html`), publicados pelo GitHub Pages a partir de `main`, no domínio `auroramanha.com.br` (DNS na Cloudflare, e-mail `contato@auroramanha.com.br` por Email Routing). Tudo o que é marketing (kit de textos, runbook do piloto, orçamento) fica no repo privado `aurora-marketing`.
 
 - `index.html`: a landing. O Portão do teste fechado é o valor `FORMS_URL` no script final (vazio = fechada, URL do Forms = aberta; hoje está aberta).
 - `fonts/`: Roboto hospedada aqui (licença Apache 2.0).
