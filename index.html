@@ -30,6 +30,8 @@
   --primary-press:#2E4F7A;
   --on-primary:#FFFFFF;
   --card:#EDEDF4;
+  --surface:#FFFFFF;
+  --elev-card:0 1px 2px rgba(25,28,32,.06),0 16px 32px -16px rgba(46,79,122,.4);
   --chip:#D8E3F8;
   --band:#E1E2E9;
   --ink-band:#3F4651;
@@ -84,48 +86,63 @@ strong{font-weight:500}
 .passos .n{font-size:4rem;line-height:1;font-weight:400;letter-spacing:-1px;color:var(--primary-press)}
 .passos strong{font-size:1.25rem;line-height:1.3;letter-spacing:.15px;text-wrap:balance}
 .passos p{margin:0;color:var(--ink-band)}
-.status{background:var(--chip);color:var(--ink);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl);max-width:32.5rem}
+.status{background:var(--chip);color:var(--ink);border:1px solid var(--outline);border-radius:16px;padding:var(--space-xl);max-width:32.5rem;margin-left:auto;margin-right:auto}
 .status p:last-of-type{margin-bottom:0}
 .fechado{font-weight:500;font-size:1.125rem}
 .entrar-bloco{max-width:32.5rem}
 .cta{font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:56px;min-width:48px;padding:0 40px;border:2px solid transparent;border-radius:28px;background:var(--primary);color:var(--on-primary);font-weight:500;font-size:1.0625rem;letter-spacing:.15px;text-decoration:none}
 .cta:hover{background:var(--primary-press)}
 .cta:active{background:var(--primary-press);opacity:.92}
-.cta[aria-disabled=true]{opacity:.7;cursor:progress}
-.cta:focus-visible,.link:focus-visible,.form input:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.cta[aria-disabled=true]{background:var(--primary-press) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='2.5'/%3E%3Cpath d='M12 3a9 9 0 0 1 9 9' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='.9s' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E") calc(50% - 2.7em) 50%/1.2em no-repeat;padding-left:calc(40px + 1.65em);cursor:progress}
+.cta:focus-visible,.link:focus-visible,.form input:focus-visible,#cadastro-ok:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .link{padding-block:16px;overflow-wrap:anywhere;color:var(--primary-press);font-weight:500;text-decoration:underline;text-underline-offset:3px}
 footer>.link{display:inline-flex;align-items:center;min-height:48px;padding-block:0}
 .link:hover,.link:active{color:var(--primary)}
-.form{display:flex;flex-direction:column;gap:var(--space-md);background:var(--card);border-radius:16px;padding:var(--space-xl)}
-.form .rotulo{font-weight:500}
-.form input[type=email]{min-height:48px;width:100%;border:1px solid var(--outline);border-radius:8px;padding:0 var(--space-md);background:#fff;color:var(--ink);font:inherit;letter-spacing:inherit}
-.form input[type=email][aria-invalid=true]{border:2px solid var(--error)}
-.form .opcao input[aria-invalid=true]{outline:2px solid var(--error);outline-offset:2px}
-.form input[aria-invalid=true]:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.form .opcao{display:flex;gap:var(--space-md);align-items:flex-start;min-height:48px;padding-block:6px;line-height:1.4}
-.form .opcao+.erro:empty+.opcao{margin-top:calc(-1*var(--space-md))}
-.form .opcao input{width:24px;height:24px;margin:0;flex:none;accent-color:var(--primary)}
-.form .opcao.suave{color:var(--ink-soft)}
-.form .cta{width:100%}
-.form .apoio{margin:0}
-.erro{margin:0;font-size:.875rem;font-weight:500;color:var(--error)}
-.erro-opcao{padding-left:36px}
-.erro:empty{display:none}
-#cadastro-ok{max-width:32.5rem;background:#fff;border:2px solid var(--primary);border-radius:16px;padding:var(--space-xl)}
-#cadastro-ok p:last-of-type{margin-bottom:var(--space-lg)}
+.form,#cadastro-ok{background-color:var(--surface);border:1px solid transparent;border-radius:24px;padding:var(--space-xl);box-shadow:var(--elev-card)}
+.form{display:flex;flex-direction:column}
+.form .rotulo{font-weight:500;margin-bottom:6px}
+.form input{transition:background-color .12s ease-out,border-color .12s ease-out}
+.form input[type=email]{min-height:56px;width:100%;border:1px solid var(--outline);border-radius:12px;padding:0 var(--space-lg);background:var(--bg);color:var(--ink);caret-color:var(--primary);font:inherit;font-size:1.0625rem;letter-spacing:.25px}
+.form input[type=email]::placeholder{color:var(--mut);opacity:1}
+.form input[type=email]:hover{border-color:var(--ink)}
+.form input[type=email][aria-invalid=true]{border-color:var(--error);box-shadow:inset 0 0 0 1px var(--error)}
+.form .opcao{display:flex;gap:var(--space-md);align-items:flex-start;min-height:48px;padding-block:var(--space-sm);line-height:1.4;cursor:pointer}
+#erro-email+.opcao{margin-top:4px}
+.form .opcao span{padding-top:1px}
+.form .opcao input{-webkit-appearance:none;appearance:none;width:1.5rem;height:1.5rem;margin:0;flex:none;border:2px solid var(--outline);border-radius:6px;background:var(--bg) center/100% no-repeat;cursor:pointer}
+.form .opcao:hover input{border-color:var(--primary)}
+.form .opcao input[aria-invalid=true]{border-color:var(--error)}
+.form .opcao input:checked{border-color:var(--primary);background-color:var(--primary);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.form .opcao.suave{color:var(--mut);border-top:1px solid var(--line)}
+.form .cta{width:100%;margin-top:var(--space-md)}
+.form .apoio{margin:var(--space-xl) 0 0;text-align:center}
+.erro{margin:6px 0 0;padding-left:24px;font-size:.875rem;line-height:1.4;font-weight:500;color:var(--error);text-wrap:balance;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23BA1A1A' stroke-width='1.75'/%3E%3Cpath d='M10 6v4.5' stroke='%23BA1A1A' stroke-width='1.75' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='13.6' r='1.1' fill='%23BA1A1A'/%3E%3C/svg%3E") 0 1px/18px no-repeat}
+.erro-opcao{margin:-2px 0 6px;padding-left:36px;background-position:3px 1px}
+#erro-android{margin-top:-10px}
+#erro-envio{margin-top:var(--space-sm);padding:var(--space-md) var(--space-md) var(--space-md) 44px;border-radius:12px;background:var(--chip) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%232E4F7A' stroke-width='1.75'/%3E%3Cpath d='M10 6v4.5' stroke='%232E4F7A' stroke-width='1.75' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='13.6' r='1.1' fill='%232E4F7A'/%3E%3C/svg%3E") 12px 12px/20px no-repeat;color:var(--ink);font-weight:400;overflow-wrap:anywhere}
+.form .opcao:has(input:checked)+.erro-opcao{display:none}
+.erro:empty,#erro-envio:empty{margin:0;padding:0;background:none}
+#cadastro-ok{scroll-margin-top:var(--space-xl);padding-top:88px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%233A608F'/%3E%3Cpath d='M12.5 20.5l5 5 10-11' fill='none' stroke='%23fff' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-position:var(--space-xl) var(--space-xl);background-size:48px;background-repeat:no-repeat}
+#cadastro-ok .fechado{font-size:1.375rem;line-height:1.3;letter-spacing:0;margin-bottom:var(--space-sm)}
+#cadastro-ok p:last-of-type{margin-bottom:var(--space-xl)}
+#ok-gmail{overflow-wrap:anywhere}
 #cadastro-ok button{margin:0}
+@keyframes chegar{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:no-preference){#cadastro-ok{animation:chegar .4s cubic-bezier(.16,1,.3,1)}}
+@media (prefers-reduced-motion:reduce){.cta[aria-disabled=true]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23fff' stroke-opacity='.35' stroke-width='2.5'/%3E%3Cpath d='M12 3a9 9 0 0 1 9 9' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E")}}
+@media (forced-colors:active){.form .opcao input{-webkit-appearance:auto;appearance:auto}.cta[aria-disabled=true]{background-image:none;padding-left:40px}.erro,#erro-envio{background-image:none}}
 [hidden]{display:none!important}
 :root{scroll-padding-bottom:9rem}
-.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:8px var(--space-lg)}
+.medicao{position:fixed;left:0;right:0;bottom:0;z-index:10;max-height:40vh;overflow-y:auto;background:var(--card);color:var(--ink);border-top:1px solid var(--outline);padding:8px var(--space-lg)}
 .medicao .miolo{display:flex;flex-wrap:wrap;align-items:center;gap:8px var(--space-lg)}
 .medicao p{max-width:70ch;margin:0;flex:1 1 20rem;font-size:.8125rem;line-height:1.3}
 .medicao .acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-sm)}
-.medicao button,.recusar,.sec{min-height:48px;min-width:48px;padding:0 var(--space-xl);border:2px solid var(--primary-press);border-radius:24px;background:transparent;color:var(--primary-press);font:inherit;font-weight:500;cursor:pointer}
+.medicao button,.sec{min-height:48px;min-width:48px;padding:0 var(--space-xl);border:2px solid var(--primary-press);border-radius:24px;background:transparent;color:var(--primary-press);font:inherit;font-weight:500;cursor:pointer}
 .medicao button{padding:0 16px}
-.medicao button:focus-visible,.recusar:focus-visible,.sec:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.recusar{display:block;margin:var(--space-sm) 0;font-size:.875rem}
+.medicao button:focus-visible,.sec:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @media (min-width:60rem){.medicao{left:auto;right:var(--space-lg);bottom:var(--space-lg);max-width:26rem;border:1px solid var(--outline);border-radius:16px;padding:var(--space-lg)}}
 footer{padding-top:var(--space-section);padding-bottom:var(--space-section)}
+body:has(.medicao:not([hidden])) footer{padding-bottom:calc(var(--space-section) + 9.5rem)}
 footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--space-sm)}
 @media (min-width:600px){h1{font-size:clamp(2.5rem,1.2rem + 3.6vw,3.75rem)}}
 @media (min-width:60rem){
@@ -139,6 +156,29 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   .tile div{padding:0 4px 4px}
   .tile b{font-size:1rem}
   .passos{grid-template-columns:repeat(3,1fr)}
+}
+/* Opção B: título centralizado, e-mail e botão na mesma linha, seis práticas em fileira */
+.hero-grade>div:first-child{text-align:center}
+.hero-grade>div:first-child .lead{max-width:34rem;margin-left:auto;margin-right:auto}
+.form,#cadastro-ok{text-align:left}
+.entrar-bloco{margin-left:auto;margin-right:auto}
+@media (min-width:60rem){
+  .form .rotulo{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+  .hero-grade{grid-template-columns:minmax(0,1fr);gap:56px;padding-top:32px}
+  h1{font-size:clamp(2.5rem,1.2rem + 2.4vw,3rem);max-width:15em;margin-left:auto;margin-right:auto}
+  .entrar-bloco,#cadastro-ok{max-width:45rem}
+  .form{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--space-sm);align-items:start;border-radius:36px;padding:var(--space-sm) var(--space-sm) var(--space-md)}
+  .form>*{grid-column:1/-1}
+  .form input[type=email]{grid-column:1;grid-row:1;border-radius:28px;padding:0 var(--space-xl)}
+  .form .cta{grid-column:2;grid-row:1;width:auto;margin-top:0}
+  .form .apoio{margin-top:var(--space-md)}
+  .mosaico{grid-template-columns:repeat(6,1fr)}
+  .mosaico .t-afirmacoes,.mosaico .t-leitura{margin-top:0}
+  .tile span{font-size:.8125rem}
+  .nota-mosaico{margin-left:auto;margin-right:auto;text-align:center}
+  body:has(.medicao:not([hidden])) footer{padding-bottom:calc(var(--space-section) + 5rem)}
+  .medicao p{max-width:none}
+  .medicao{left:0;right:0;bottom:0;max-width:none;border:0;border-top:1px solid var(--outline);border-radius:0;padding:8px var(--space-lg)}
 }
 </style>
 </head>
@@ -175,7 +215,7 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
             <div class="sr" aria-hidden="true"><input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off"></div>
             <p id="erro-envio" class="erro" aria-live="polite"></p>
             <button id="entrar" class="cta" data-entrar type="submit">Entrar na lista</button>
-            <p class="apoio">Só para Android. <a class="link" href="/privacidade/">Política de privacidade</a>: por quanto tempo guardamos o Gmail e como pedir a exclusão.</p>
+            <p class="apoio">Só para Android. <a class="link" href="/privacidade/">Política de privacidade</a></p>
           </form>
           <div id="cadastro-ok" role="status" tabindex="-1" hidden>
             <p class="fechado">Você está na lista.</p>
@@ -222,14 +262,12 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   <a class="link" href="/privacidade/">Política de privacidade</a>
   <p>O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.</p>
   <p>O Aurora não substitui orientação médica ou psicológica.</p>
-  <p data-rodape-pixel>Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.</p>
-  <button type="button" class="recusar" data-recusar data-com-pixel hidden>Recusar medição</button>
-  <p>Dúvidas ou pedido de exclusão: <a class="link" href="mailto:contato@auroramanha.com.br">contato@auroramanha.com.br</a>.</p>
+  <p data-rodape-pixel>Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.</p>
 </footer>
 
 <aside id="medicao" class="medicao" aria-label="Aviso de medição" hidden>
   <div class="miolo">
-    <p>Usamos o Pixel da Meta para medir os anúncios que trazem você até esta página. Ele grava o cookie _fbp e envia à Meta a sua visita e o clique em entrar.</p>
+    <p>Esta página usa cookies para medir os anúncios. Os detalhes estão na política de privacidade.</p>
     <div class="acoes">
       <a class="link" href="/privacidade/">Saiba mais</a>
       <button type="button" data-recusar>Recusar</button>
@@ -334,13 +372,11 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
   var estado = null;
   try { estado = localStorage.getItem(CHAVE); } catch (e) {}
   function gravar(v) { try { localStorage.setItem(CHAVE, v); } catch (e) {} }
-  function mostrar(sel, ligado) { document.querySelectorAll(sel).forEach(function (el) { el.hidden = !ligado; }); }
   var rodape = document.querySelector("[data-rodape-pixel]");
   var textoSemPixel = rodape.textContent;
-  var textoComPixel = "Esta página usa o Pixel da Meta, que grava o cookie _fbp, para medir os anúncios que trazem você até aqui. Você pode recusar a medição. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.";
+  var textoComPixel = "Esta página usa cookies para medir os anúncios. Os detalhes estão na política de privacidade.";
   if (estado === "recusada") return;
   rodape.textContent = textoComPixel;
-  mostrar("[data-com-pixel]", true);
   !function (f, b, e, v, n, t, s) {
     if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
     if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = [];
@@ -374,7 +410,6 @@ footer p{max-width:70ch;font-size:.875rem;color:var(--mut);margin-bottom:var(--s
       apagarCookies();
       gravar("recusada");
       aviso.hidden = true;
-      mostrar("[data-com-pixel]", false);
       rodape.textContent = textoSemPixel;
     });
   });

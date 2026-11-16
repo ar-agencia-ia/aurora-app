@@ -130,12 +130,12 @@ test('copy do canvas: selo, práticas e passos', async ({ page }) => {
         'O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.',
       );
       await expect(rodape.nth(1), estado).toHaveText('O Aurora não substitui orientação médica ou psicológica.');
-      // divergência de propósito: o canvas diz "serviços de terceiros" e o index cita scripts de terceiros e o GitHub Pages
+      // divergência de propósito: texto genérico de cookies, sem hospedagem, formulário nem e-mail no rodapé
       await expect(rodape.nth(2), estado).toHaveText(
-        'Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.',
+        'Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.',
       );
-      // divergência de propósito: o canvas traz o Gmail do autor e o index traz contato@auroramanha.com.br (AC 30)
-      await expect(rodape.nth(3), estado).toHaveText(`Dúvidas ou pedido de exclusão: ${EMAIL}.`);
+      await expect(rodape, estado).toHaveCount(3);
+      await expect(page.locator('footer a[href^="mailto:"]'), estado).toHaveCount(0);
       const fechado = page.locator('#portao-fechado');
       const bloco = page.locator('#portao-aberto');
       if (estado === 'aberto') {
@@ -146,7 +146,7 @@ test('copy do canvas: selo, práticas e passos', async ({ page }) => {
           'Opcional: quero ser avisado quando o app for lançado.',
         ]);
         await expect(bloco.locator('form > p.apoio')).toHaveText(
-          'Só para Android. Política de privacidade: por quanto tempo guardamos o Gmail e como pedir a exclusão.',
+          'Só para Android. Política de privacidade',
         );
         await expect(fechado).toBeHidden();
         await expect(bloco).toBeVisible();
@@ -172,12 +172,12 @@ test('atributos e estrutura do canvas e e-mail de contato nos dois estados', asy
     const alvo = await iniciar(estado === 'aberto' ? { chave: CHAVE_TESTE } : {});
     try {
       await page.goto(alvo.url, { waitUntil: 'networkidle' });
-      // e-mail de contato: texto e href literais no bloco fechado e no rodapé (AC 30)
-      for (const email of [page.locator('#cadastro a[href^="mailto:"]'), page.locator('footer a[href^="mailto:"]')]) {
-        await expect(email, estado).toHaveCount(1);
-        await expect(email, estado).toHaveText(EMAIL);
-        await expect(email, estado).toHaveAttribute('href', `mailto:${EMAIL}`);
-      }
+      // e-mail de contato: texto e href literais só no bloco fechado (AC 30); o rodapé não tem e-mail
+      const email = page.locator('#cadastro a[href^="mailto:"]');
+      await expect(email, estado).toHaveCount(1);
+      await expect(email, estado).toHaveText(EMAIL);
+      await expect(email, estado).toHaveAttribute('href', `mailto:${EMAIL}`);
+      await expect(page.locator('footer a[href^="mailto:"]'), estado).toHaveCount(0);
       // o canvas fixa alt="" (decorativas) nas 7 imagens, lang pt-BR e aria-hidden nos numerais
       await expect(page.locator('img'), estado).toHaveCount(7);
       for (const img of await page.locator('img').all()) await expect(img, estado).toHaveAttribute('alt', '');
@@ -297,7 +297,7 @@ test('estrutura semântica, arranjo do hero e head nos dois estados', async ({ p
   }
 });
 
-test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canvas', async ({ page }) => {
+test('disposição a 1280 px: título centralizado, seis práticas numa fileira na ordem do canvas', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(site.url, { waitUntil: 'networkidle' });
   const caixa = async (seletor) => {
@@ -305,39 +305,23 @@ test('disposição a 1280 px: hero em duas colunas, mosaico 3x2 na ordem do canv
     expect(b, seletor).not.toBeNull();
     return b;
   };
-  // hero: o texto fica à esquerda do mosaico, lado a lado
+  // hero em coluna única: o mosaico fica abaixo do título e do formulário
   const titulo = await caixa('#promessa h1');
   const mosaico = await caixa('.mosaico');
-  expect(titulo.x + titulo.width, 'texto à esquerda do mosaico').toBeLessThanOrEqual(mosaico.x);
-  expect(Math.abs(titulo.y - mosaico.y), 'texto e mosaico começam na mesma faixa').toBeLessThan(mosaico.height);
-  // mosaico: 3 colunas e 2 linhas
+  expect(titulo.y + titulo.height, 'mosaico abaixo do texto').toBeLessThanOrEqual(mosaico.y);
+  expect(Math.abs(titulo.x + titulo.width / 2 - 640), 'título centralizado').toBeLessThan(40);
+  // mosaico: 6 colunas em 1 linha, sem deslocamento
   const tiles = [];
   for (const el of await page.locator('.mosaico .tile').all()) {
     tiles.push({ nome: await el.locator('b').textContent(), ...(await el.boundingBox()) });
   }
   expect(tiles).toHaveLength(6);
   const arred = (n) => Math.round(n);
-  const colunas = [...new Set(tiles.map((t) => arred(t.x)))];
-  expect(colunas, 'colunas').toHaveLength(3);
-  // ordem visual por (y, x) igual à do canvas C3: S-A-V-E-L-D
-  const visual = [...tiles].sort((a, b) => a.y - b.y || a.x - b.x);
-  const primeiraLinha = visual.slice(0, 3);
-  const segundaLinha = visual.slice(3);
-  // duas linhas: nenhum tile da 2ª começa antes do fim do menor da 1ª
-  const fimPrimeira = Math.min(...primeiraLinha.map((t) => t.y + t.height));
-  for (const t of segundaLinha) expect(t.y, `${t.nome} na 2ª linha`).toBeGreaterThanOrEqual(fimPrimeira);
-  const porColuna = (grupo) => [...grupo].sort((a, b) => a.x - b.x).map((t) => t.nome);
-  expect([...porColuna(primeiraLinha), ...porColuna(segundaLinha)]).toEqual([
+  expect([...new Set(tiles.map((t) => arred(t.x)))], 'colunas').toHaveLength(6);
+  expect(new Set(tiles.map((t) => arred(t.y))).size, 'uma linha só').toBe(1);
+  expect([...tiles].sort((a, b) => a.x - b.x).map((t) => t.nome)).toEqual([
     'Meditação', 'Afirmações', 'Visualização', 'Exercício', 'Leitura', 'Diário',
   ]);
-  // tiles 2 e 5 (Afirmações, Leitura) deslocados para baixo em relação aos vizinhos de linha
-  const por = Object.fromEntries(tiles.map((t) => [t.nome, t]));
-  expect(por['Afirmações'].y - por['Meditação'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
-  expect(por['Afirmações'].y - por['Visualização'].y, 'Afirmações deslocado').toBeGreaterThanOrEqual(20);
-  expect(por['Leitura'].y - por['Exercício'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
-  expect(por['Leitura'].y - por['Diário'].y, 'Leitura deslocado').toBeGreaterThanOrEqual(20);
-  expect(Math.abs(por['Meditação'].y - por['Visualização'].y), 'Meditação e Visualização alinhados').toBeLessThan(2);
-  expect(Math.abs(por['Exercício'].y - por['Diário'].y), 'Exercício e Diário alinhados').toBeLessThan(2);
   // passos: 3 colunas na mesma linha
   const passos = [];
   for (const el of await page.locator('#passos ol > li').all()) passos.push(await el.boundingBox());
@@ -379,7 +363,7 @@ test('rodapé aponta para a política no próprio domínio, igual à fonte e sem
 });
 // AC 13 (sem depoimento, estrelas nem contagem de usuários) por mundo fechado: todo o texto visível da página
 // é exatamente a lista do canvas VersaoC3.dc.html (sha256 0e6b8221...) mais as divergências de propósito do C33
-// (e-mail contato@auroramanha.com.br no lugar do Gmail, frase de terceiros e GitHub Pages, <noscript> fora da tela).
+// (e-mail contato@auroramanha.com.br no lugar do Gmail, texto genérico de cookies no rodapé, <noscript> fora da tela).
 // Texto acrescentado em qualquer ponto (antes de </main>, nos passos, na banda, no rodapé) muda a lista e falha.
 test("mundo fechado: o texto visível é só o do canvas e não há depoimento, citação nem figura", async ({
   page,
@@ -423,8 +407,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
     "Política de privacidade",
     "O Aurora não é o app oficial do Método Milagre da Manhã nem tem vínculo com o autor ou a editora.",
     "O Aurora não substitui orientação médica ou psicológica.",
-    "Esta página não usa cookies, rastreadores nem scripts de terceiros. Ela é hospedada no GitHub Pages e o cadastro é recebido pelo Web3Forms, serviço de formulário.",
-    `Dúvidas ou pedido de exclusão: ${EMAIL}.`,
+    "Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.",
   ];
   const esperado = {
     fechado: [
@@ -443,7 +426,7 @@ test("mundo fechado: o texto visível é só o do canvas e não há depoimento, 
       "Aceito participar do teste fechado por no mínimo 14 dias e que o Aurora use o meu Gmail só para esse convite.",
       "Opcional: quero ser avisado quando o app for lançado.",
       "Entrar na lista",
-      "Só para Android. Política de privacidade: por quanto tempo guardamos o Gmail e como pedir a exclusão.",
+      "Só para Android. Política de privacidade",
       ...meio,
       ...rodape,
     ],
@@ -629,7 +612,7 @@ test("interação, forma e tipografia do canvas nos dois estados", async ({
   }
 });
 
-test("a 1600 px: mosaico deslocado 28 px, hero alinhado ao topo e .miolo com largura máxima", async ({
+test("a 1600 px: sem deslocamento no mosaico e .miolo com largura máxima", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1600, height: 900 });
@@ -637,17 +620,12 @@ test("a 1600 px: mosaico deslocado 28 px, hero alinhado ao topo e .miolo com lar
   const y = async (q) => (await page.locator(q).first().boundingBox()).y;
   expect(
     Math.round((await y(".t-afirmacoes")) - (await y(".t-silencio"))),
-    "Afirmações deslocada",
-  ).toBe(28);
+    "Afirmações sem deslocamento",
+  ).toBe(0);
   expect(
     Math.round((await y(".t-leitura")) - (await y(".t-exercicio"))),
-    "Leitura deslocada",
-  ).toBe(28);
-  // alinhado ao topo: o h1 (margem de 24 px) e o mosaico começam a menos de 48 px um do outro
-  expect(
-    Math.abs((await y("#promessa h1")) - (await y(".mosaico"))),
-    "hero alinhado ao topo",
-  ).toBeLessThan(48);
+    "Leitura sem deslocamento",
+  ).toBe(0);
   for (const q of ["#promessa", "#passos .miolo", "footer"]) {
     expect(
       (await page.locator(q).first().boundingBox()).width,

@@ -119,37 +119,43 @@ test("aviso com Entendi e Recusar e o link da política", async ({ page }) => {
   }
 });
 
-for (const via of ["aviso", "rodapé"]) {
-  test(`Recusar revoga o consentimento, apaga _fbp e grava recusada (${via})`, async ({
-    page,
-  }) => {
-    const { alvo } = await abrir(page, {
-      antes: () => {
-        document.cookie = "_fbp=fb.1.1.1; path=/";
-      },
-    });
-    try {
-      expect(await page.evaluate(() => document.cookie)).toContain("_fbp=");
-      const botao =
-        via === "aviso"
-          ? page
-              .locator("#medicao")
-              .getByRole("button", { name: "Recusar", exact: true })
-          : page
-              .locator("footer")
-              .getByRole("button", { name: "Recusar medição" });
-      await botao.click();
-      expect(await chamadas(page)).toContainEqual(["consent", "revoke"]);
-      expect(await page.evaluate(() => document.cookie)).not.toContain("_fbp");
-      expect(
-        await page.evaluate(() => localStorage.getItem("aurora-medicao")),
-      ).toBe("recusada");
-      await expect(page.locator("#medicao")).toBeHidden();
-    } finally {
-      alvo.fechar();
-    }
+test("Recusar do aviso revoga o consentimento, apaga _fbp e grava recusada", async ({
+  page,
+}) => {
+  const { alvo } = await abrir(page, {
+    antes: () => {
+      document.cookie = "_fbp=fb.1.1.1; path=/";
+    },
   });
-}
+  try {
+    expect(await page.evaluate(() => document.cookie)).toContain("_fbp=");
+    await page
+      .locator("#medicao")
+      .getByRole("button", { name: "Recusar", exact: true })
+      .click();
+    expect(await chamadas(page)).toContainEqual(["consent", "revoke"]);
+    expect(await page.evaluate(() => document.cookie)).not.toContain("_fbp");
+    expect(
+      await page.evaluate(() => localStorage.getItem("aurora-medicao")),
+    ).toBe("recusada");
+    await expect(page.locator("#medicao")).toBeHidden();
+  } finally {
+    alvo.fechar();
+  }
+});
+
+test("o rodapé não tem botão de recusar nem link de e-mail", async ({ page }) => {
+  const { alvo } = await abrir(page);
+  try {
+    await expect(page.locator("footer button")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Recusar medição" }),
+    ).toHaveCount(0);
+    await expect(page.locator("footer a[href^='mailto:']")).toHaveCount(0);
+  } finally {
+    alvo.fechar();
+  }
+});
 
 test("recusa persiste: nova visita não pede fbevents.js nem mostra o aviso", async ({
   page,
@@ -161,7 +167,7 @@ test("recusa persiste: nova visita não pede fbevents.js nem mostra o aviso", as
     expect(pedidosMeta).toEqual([]);
     await expect(page.locator("#medicao")).toBeHidden();
     expect(await page.evaluate(() => typeof window.fbq)).toBe("undefined");
-    await expect(page.locator("footer button[data-com-pixel]")).toBeHidden();
+    await expect(page.locator("footer button")).toHaveCount(0);
   } finally {
     alvo.fechar();
   }
@@ -236,7 +242,10 @@ test("depois de Recusar, o clique em Entrar não registra ClicouEntrar", async (
 }) => {
   const { alvo } = await abrir(page);
   try {
-    await page.locator("footer").getByRole("button", { name: "Recusar medição" }).click();
+    await page
+      .locator("#medicao")
+      .getByRole("button", { name: "Recusar", exact: true })
+      .click();
     await page.locator("[data-entrar]").first().click();
     expect(await chamadas(page)).not.toContainEqual([
       "trackCustom",
@@ -276,11 +285,9 @@ test("rodapé declara o Pixel com ID e mantém o texto antigo sem ID", async ({
   try {
     const rodape = page.locator("footer");
     await expect(rodape).toContainText(
-      "Esta página usa o Pixel da Meta, que grava o cookie _fbp",
+      "Esta página usa cookies para medir os anúncios. Os detalhes estão na política de privacidade.",
     );
-    await expect(rodape).not.toContainText(
-      "não usa cookies, rastreadores nem scripts de terceiros",
-    );
+    await expect(rodape).not.toContainText("não usa cookies");
   } finally {
     com.alvo.fechar();
   }
@@ -288,9 +295,9 @@ test("rodapé declara o Pixel com ID e mantém o texto antigo sem ID", async ({
   try {
     await page.goto(sem.url, { waitUntil: "networkidle" });
     await expect(page.locator("footer")).toContainText(
-      "Esta página não usa cookies, rastreadores nem scripts de terceiros.",
+      "Esta página não usa cookies nem rastreadores. Os detalhes estão na política de privacidade.",
     );
-    await expect(page.locator("footer button[data-com-pixel]")).toBeHidden();
+    await expect(page.locator("footer button")).toHaveCount(0);
   } finally {
     sem.fechar();
   }
